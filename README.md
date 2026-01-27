@@ -11,7 +11,7 @@ This project is about Creating your own maze generator and display its result!
 
 
 # A-Maze-ing
-<img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2s1YW1pc3dveWMwcHl6djdtaWxiOTRmcGdkejlrMnhrNmRxYmVidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9PGlgQpWnKbviiIJO5/giphy.gif">
+<img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2s1YW1pc3dveWMwcHl6djdtaWxiOTRmcGdkejlrMnhrNmRxYmVidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9PGlgQpWnKbviiIJO5/giphy.gif" >
 
 
 *This project has been created as part of the 42 curriculum by [skoulal] & [wabbad].*
