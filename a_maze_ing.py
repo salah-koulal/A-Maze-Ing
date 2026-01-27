@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""
+A-Maze-ing: Maze Generator and Visualizer
+Main entry point for the program.
+"""
+
+import sys
+from typing import NoReturn
+
+
+def main() -> None:
+    """Main program entry point."""
+    if len(sys.argv) != 2:
+        print("Usage: python3 a_maze_ing.py <config_file>")
+        sys.exit(1)
+    
+    config_file = sys.argv[1]
+    
+    try:
+        print(f"Loading configuration from: {config_file}")
+        # TODO: Implement configuration loading
+        # TODO: Implement maze generation
+        # TODO: Implement file writing
+        # TODO: Implement visualization
+        
+        print("Maze generation complete!")
+        
+    except FileNotFoundError:
+        print(f"Error: Configuration file '{config_file}' not found.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
