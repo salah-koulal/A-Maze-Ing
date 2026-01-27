@@ -3,7 +3,7 @@ This project is about Creating your own maze generator and display its result!
 
 
 ## Will be updated later  
-<img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZmoyampnYmt4ZWJmYmJubGRocnYwM3d5eXM3OHQyOGV4MXBwNTFjMCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/XZrUw9cTqJ0vi8bmV9/giphy.gif">
+<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXkzc2kzbHJ6YnBmaGpwdWM0cGFvcndpejR0c2RnMnFwaGtiNmw4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3j9eE7bkTgHU8yS5BS/giphy.gif">
 
 
 ---
