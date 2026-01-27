@@ -3,15 +3,20 @@ This project is about Creating your own maze generator and display its result!
 
 
 ## Will be updated later  
-<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXkzc2kzbHJ6YnBmaGpwdWM0cGFvcndpejR0c2RnMnFwaGtiNmw4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3j9eE7bkTgHU8yS5BS/giphy.gif">
-
 
 ---
 ---
 
 
 # A-Maze-ing
+
+
 <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2s1YW1pc3dveWMwcHl6djdtaWxiOTRmcGdkejlrMnhrNmRxYmVidiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9PGlgQpWnKbviiIJO5/giphy.gif" >
+
+
+<img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXkzc2kzbHJ6YnBmaGpwdWM0cGFvcndpejR0c2RnMnFwaGtiNmw4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3j9eE7bkTgHU8yS5BS/giphy.gif">
+
+
 
 
 *This project has been created as part of the 42 curriculum by [skoulal] & [wabbad].*
