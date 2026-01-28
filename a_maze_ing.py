@@ -5,7 +5,8 @@ Main entry point for the program.
 """
 
 import sys
-from typing import NoReturn
+from src.config_parser import load_config
+
 
 
 def main() -> None:
@@ -17,20 +18,16 @@ def main() -> None:
     config_file = sys.argv[1]
     
     try:
-        print(f"Loading configuration from: {config_file}")
-        # TODO: Implement configuration loading
-        # TODO: Implement maze generation
-        # TODO: Implement file writing
-        # TODO: Implement visualization
-        
-        print("Maze generation complete!")
-        
+            config = load_config(config_file)
+            print(f"Config loaded: {config}")
+            # TODO: - maze generation!
+            
     except FileNotFoundError:
-        print(f"Error: Configuration file '{config_file}' not found.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+            print(f"Error: File not found")
+            sys.exit(1)
+    except ValueError as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
