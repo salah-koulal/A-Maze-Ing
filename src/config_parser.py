@@ -51,9 +51,13 @@ class ConfigParser:
         self.config["HEIGHT"] = int(self.config["HEIGHT"])
 
         entry_parts = self.config["ENTRY"].split(",")
+        if len(entry_parts) != 2:
+            raise ValueError("Entry must be in format 'x,y'")
         self.config["ENTRY"] = (int(entry_parts[0]), int(entry_parts[1]))
 
         exit_parts = self.config["EXIT"].split(",")
+        if len(exit_parts) != 2:
+            raise ValueError("Exit must be in format 'x,y'")
         self.config["EXIT"] = (int(exit_parts[0]), int(exit_parts[1]))
 
         self.config["PERFECT"] = self.config["PERFECT"] == "True"
@@ -87,6 +91,7 @@ class ConfigParser:
         """
         with open(self.filepath) as f:
             for line in f:
+                print(f">>> {line}")
                 result = self._parse_line(line)
                 if result:
                     key, value = result
