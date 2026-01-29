@@ -32,7 +32,6 @@ class MazeGenerator:
         if seed is not None:
             random.seed(seed)
             
-        # Create grid using your Cell class
         self.grid: List[List[Cell]] = []
         for y in range(height):
             row = []
@@ -53,16 +52,68 @@ class MazeGenerator:
         if cell.y > 0:
             neighbors.append( (self.grid[cell.y - 1][cell.x], 'N') )
         
-        if cell.x > 0:
+        if cell.x < self.width - 1:
             neighbors.append( (self.grid[cell.y][cell.x + 1] , 'E') )
         
-        if cell.y > 0:
+        if cell.y < self.height - 1:
             neighbors.append( (self.grid[cell.y + 1][cell.x] , 'S') )
 
         if cell.x > 0:
             neighbors.append( (self.grid[cell.y][cell.x - 1], 'W') )
 
         return neighbors
+    
+    
+    def remove_wall_between(self, cell1: Cell, cell2: Cell, direction: str) -> None:
+        """Remove wall between two cells."""
+        cell1.remove_wall(direction)
+        
+        opposite = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
+        cell2.remove_wall(opposite[direction])
+
+    def generate(self) -> List[List[Cell]]:
+        """The core Part is here :Generate maze using Prim's algorithm."""
+
+        # first we gonna pick a random start
+        start_x = random.randint(0, self.width - 1)
+        start_y = random.randint(0, self.height - 1)
+
+        start_cell = self.grid[start_y][start_x]
+        start_cell.visited = True
+        
+        
+        #List that connect VISITED rooms to UNVISITED rooms
+        
+
+        frontier: List[Tuple[Cell, Cell, str]] = []
+        
+        # --- Example output for cell [1,1] neighbors ---:
+        # [
+        # (Cell[1,0], 'north'),  # Cell above
+        # (Cell[2,1], 'east'),   # Cell to the right
+        # (Cell[1,2], 'south'),  # Cell below
+        # (Cell[0,1], 'west')    # Cell to the left
+        # ]
+        for neighbor, direction in self.get_neighbors(start_cell):
+            frontier.append( (start_cell, neighbor, direction) )
+        
+        while frontier:
+            # Pick random wall
+            wall_index = random.randint(0, len(frontier) - 1)
+            current_cell, neighbor_cell, direction = frontier.pop(wall_index)
+            
+            if not neighbor_cell.visited:
+                self.remove_wall_between(current_cell, neighbor_cell, direction)
+                neighbor_cell.visited = True
+        
+            for next_neighbor, next_dir in self.get_neighbors(neighbor_cell):
+                if not next_neighbor.visited:
+                    frontier.append((neighbor_cell, next_neighbor, next_dir))
+            
+        return self.grid
+
+
+
 
 
 cell = Cell(0, 0)
