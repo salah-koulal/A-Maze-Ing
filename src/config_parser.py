@@ -91,7 +91,6 @@ class ConfigParser:
         """
         with open(self.filepath) as f:
             for line in f:
-                print(f">>> {line}")
                 result = self._parse_line(line)
                 if result:
                     key, value = result
