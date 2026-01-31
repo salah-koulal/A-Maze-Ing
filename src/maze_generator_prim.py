@@ -116,14 +116,14 @@ class MazeGenerator:
 
 
 
-cell = Cell(0, 0)
-print(cell.walls)
+# cell = Cell(0, 0)
+# print(cell.walls)
 
-cell.remove_wall('N')
-print(cell.walls)
+# cell.remove_wall('N')
+# print(cell.walls)
 
-cell.remove_wall('E')
-print(cell.walls)
+# cell.remove_wall('E')
+# print(cell.walls)
 
-print(cell.has_wall('W'))
-print(cell.has_wall('E'))
+# print(cell.has_wall('W'))
+# print(cell.has_wall('E'))
