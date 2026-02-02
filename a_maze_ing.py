@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
 A-Maze-ing: Maze Generator and Visualizer
-Main entry point for the program.
+Main entry point for the program using the mazegen package.
 """
 
 import sys
-from src.config_parser import load_config
-
-
+from src.mazegen import MazeGenerator
 
 def main() -> None:
     """Main program entry point."""
@@ -18,16 +16,22 @@ def main() -> None:
     config_file = sys.argv[1]
     
     try:
-            config = load_config(config_file)
-            print(f"Config loaded: {config}")
-            # TODO: - maze generation!
-            
+        # Initialize the generator from the config file
+        # The MazeGenerator class handles seed/size overrides and the main loop.
+        generator = MazeGenerator(config_file)
+        
+        # Run the interactive maze generation loop
+        generator.run()
+
     except FileNotFoundError:
-            print(f"Error: File not found")
-            sys.exit(1)
+        print(f"Error: Configuration file '{config_file}' not found.")
+        sys.exit(1)
     except ValueError as e:
-            print(f"Error: {e}")
-            sys.exit(1)
+        print(f"Error in configuration: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -1,27 +1,16 @@
-
+*This project has been created as part of the 42 curriculum by [skoulal] & [wabbad].*
 
 # A-Maze-ing
+
 ---
 
 <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXkzc2kzbHJ6YnBmaGpwdWM0cGFvcndpejR0c2RnMnFwaGtiNmw4dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3j9eE7bkTgHU8yS5BS/giphy.gif">
 
-
 ---
-
-*This project has been created as part of the 42 curriculum by [skoulal] & [wabbad].*
 
 ## Description
 
-A-Maze-ing is a maze generator that creates perfect mazes with a single unique path between entry and exit points. The project implements maze generation algorithms, provides visual representation, and outputs mazes in a hexadecimal wall encoding format.
-
-## Features
-
-- Random maze generation with reproducible seeds
-- Perfect maze support (single path between entry and exit)
-- Hexadecimal wall encoding output
-- Visual representation (ASCII/MLX)
-- "42" pattern embedded in maze structure
-- Configurable via text files
+A-Maze-ing is a maze generator that creates perfect mazes with a single unique path between entry and exit points. The project implements Prim's algorithm for maze generation, provides a highly animated visual representation in ASCII, and outputs mazes in a hexadecimal wall encoding format as required by the 42 curriculum.
 
 ## Instructions
 
@@ -31,137 +20,124 @@ A-Maze-ing is a maze generator that creates perfect mazes with a single unique p
 git clone https://github.com/salah-koulal/A-Maze-Ing
 cd A-Maze-Ing
 
-# Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+# Install dependencies and set up environment
 make install
 ```
 
 ### Usage
 ```bash
 # Run with default configuration
-make run
-
-# Run with custom configuration
-python3 a_maze_ing.py config/my_config.txt
+python3 a_maze_ing.py config/default_config.txt
 ```
 
 ### Configuration File Format
-
-The configuration file uses KEY=VALUE pairs, one per line:
-
-WIDTH=20           # Maze width in cells
-HEIGHT=15          # Maze height in cells
-ENTRY=0,0          # Entry coordinates (x,y)
-EXIT=19,14         # Exit coordinates (x,y)
-OUTPUT_FILE=maze.txt  # Output filename
-PERFECT=True       # Perfect maze flag
-SEED=42            # Random seed (optional)
-
-Lines starting with `#` are comments and will be ignored.
+The configuration file must contain one `KEY=VALUE` pair per line.
+- `WIDTH`: Maze width (number of cells)
+- `HEIGHT`: Maze height
+- `ENTRY`: Entry coordinates (x,y)
+- `EXIT`: Exit coordinates (x,y)
+- `OUTPUT_FILE`: Output filename
+- `PERFECT`: Is the maze perfect? (True/False)
+- `SEED`: Random seed for reproducibility (optional)
 
 ## Maze Generation Algorithm
 
-**Algorithm:** Recursive Backtracker
+**Algorithm:** Prim's Algorithm (Frontier-based)
 
 **Why this algorithm:**
-- Simple to implement and understand
-- Guarantees perfect mazes (no loops, single path)
-- Creates interesting long, winding passages
-- Memory efficient with stack-based approach
+- Produces mazes with many short dead ends and a more complex, less "directional" look than Recursive Backtracker.
+- Easily adaptable for embedding patterns like "42" by marking cells as pre-visited.
+- Efficiency: Uses a frontier set to grow the maze from a starting point, ensuring full connectivity.
 
 **How it works:**
-1. Start at a random cell, mark it as visited
-2. While there are unvisited cells:
-   - If current cell has unvisited neighbors:
-     - Choose random unvisited neighbor
-     - Remove wall between current and neighbor
-     - Move to neighbor
-   - Else backtrack to previous cell
+1. Start with a grid full of walls.
+2. Pick a random cell, mark it as part of the maze.
+3. Add the walls of that cell to the frontier list.
+4. While the frontier list is not empty:
+   - Pick a random wall from the frontier.
+   - If the cell on the other side of the wall is not in the maze:
+     - Remove the wall and mark the cell as part of the maze.
+     - Add the new cell's walls to the frontier.
+   - Remove the wall from the frontier.
 
-## Reusable Code
+## Reusable Module: `mazegen`
 
-The maze generation logic is packaged as `mazegen` and can be installed via pip:
+The maze generation logic is packaged as a standalone, pip-installable module named `mazegen`.
+
+### Installation
+You can install the package from the root of the repository:
+```bash
+pip install .
+```
+Or use the pre-built package:
 ```bash
 pip install mazegen-1.0.0-py3-none-any.whl
 ```
 
-**Usage example:**
+### Documentation & Usage
+
+#### 1. Instantiation
+To use the generator, instantiate the `MazeGenerator` class. You can pass a configuration file path, and optionally override the seed and size.
+
 ```python
 from mazegen import MazeGenerator
 
-# Create a maze generator
-generator = MazeGenerator(width=20, height=15, seed=42)
-
-# Generate a perfect maze
-maze = generator.generate(perfect=True)
-
-# Get the solution path
-path = generator.find_path(entry=(0,0), exit=(19,14))
-
-# Access maze structure
-for row in maze.grid:
-    for cell in row:
-        print(cell.walls)
+# Initialize from config file, size and seed are optional
+generator = MazeGenerator("config/default_config.txt", seed="42", size=(53, 53))
 ```
 
-See `docs/package_usage.md` for detailed documentation.
+#### 2. Generating the Maze
+The `generate_maze()` method generates the maze structure using the selected algorithm (defaults to Prim's).
 
-## Development
-
-### Running Tests
-```bash
-make test
+```python
+# Generate maze
+maze = generator.generate_maze()
 ```
 
-### Linting
-```bash
-make lint          # Standard linting
-make lint-strict   # Strict type checking
+#### 3. Accessing the Structure
+The generated maze structure is returned as a 2D list of `Cell` objects (or internal representation). You can also draw it to the terminal.
+
+```python
+# Display the maze in ASCII
+generator.draw_maze(maze)
+
+# The structure is also accessible via:
+# maze[y][x].walls  <- Bitmask of walls (N=1, E=2, S=4, W=8)
 ```
 
-### Cleaning
-```bash
-make clean
+#### 4. Getting a Solution
+You can retrieve the shortest path from the entry to the exit.
+
+```python
+# Get solution path as a string of movements (e.g., "EENSSW")
+solution_path = generator.get_solution(maze)
+print(f"Solution: {solution_path}")
 ```
 
-## Resources
+#### 5. Interactive Mode
+Run the full interactive generation and animation loop.
 
-### Classic References
-- [Maze Generation Algorithm - Wikipedia](https://en.wikipedia.org/wiki/Maze_generation_algorithm)
-- [Think Labyrinth: Maze Algorithms](http://www.astrolog.org/labyrnth/algrithm.htm)
-- [Jamis Buck's Maze Generation Blog](https://weblog.jamisbuck.org/2011/2/7/maze-generation-algorithm-recap)
-
-### AI Usage
-- **Algorithm research:** Used AI to compare different maze generation algorithms
-- **Code structure:** Discussed project organization and module design
-- **Documentation:** Generated initial docstring templates
-- **Debugging:** Asked for help with wall coherence validation logic
+```python
+generator.run()
+```
 
 ## Team & Project Management
 
-### Team Members
-- **Member 1 (Core Logic):** [Salah eddine Koulal/ skoulal] - Maze generation, algorithms, file I/O
-- **Member 2 (Interface):** [walid / wabbad] - Visualization, packaging, integration
+### Roles
+- **[skoulal] (Salah eddine Koulal)**: Core algorithm implementation, Prim's logic, and hex output formatting, DFS path finding algorithm.
+- **[wabbad] (walid)**: Visualization system, animation playback, and Maze generation using DFS.
 
+### Project Evolution
+- **Initial Plan**: Focus on basic Recusrive Backtracker.
+- **Evolution**: Switched to Prim's Algorithm to better support the "42" pattern requirement and create more visually interesting mazes. Added a frame-by-frame animation system as a bonus feature.
 
-### What Worked Well
-- Early agreement on data structures prevented integration issues
-- Daily standups kept us aligned
-- Pair programming on complex algorithms
-
-### What Could Be Improved
-- Should have started testing earlier
-- Need better git branching strategy
-- Documentation could be more detailed
+### Resources
+- [Prim's Algorithm - Maze Generation](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Randomized_Prim's_algorithm)
+- [42 Subject PDF](A-maze-ing_subject.pdf)
+- **AI Usage**: Used for refactoring the rendering engine to support multi-character ASCII frames and for validating the hex bitmask logic against the subject requirements.
 
 ### Tools Used
-- **Git/GitHub:** Version control
-- **Pytest:** Testing framework
-- **Discord:** Daily communication
-
-## License
-
-This is an educational project for 42 School.
+- **Git**: Version control
+- **Make**: Automation
+- **Python 3.10+**: Core language
+- **Flake8/Mypy**: Linting and static analysis

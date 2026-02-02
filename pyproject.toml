@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mazegen"
+version = "1.0.0"
+description = "A-Maze-ing: Maze Generator and Visualizer"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+  {name = "skoulal"},
+  {name = "wabbad"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mazegen*"]
+
+[tool.setuptools.package-data]
+"mazegen.internal" = ["*.txt"]

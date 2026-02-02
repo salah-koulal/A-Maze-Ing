@@ -19,7 +19,7 @@ class MazeGenerator:
     def __init__(self, height, width, seed = 42):
         self.height = height
         self.width = width
-        self.seed = seed;
+        self.seed = seed
         random.seed(seed)
 
         self.grid = []

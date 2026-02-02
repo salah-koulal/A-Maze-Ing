@@ -13,7 +13,7 @@ write_maze_to_file(
     filename="test_output.txt"
 )
 
-print("File written! Check test_output.txt")
+print("✅ File written! Check test_output.txt")
 
 with open("test_output.txt") as f:
     print(f.read())
