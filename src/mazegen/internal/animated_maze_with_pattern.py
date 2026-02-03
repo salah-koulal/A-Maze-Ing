@@ -149,6 +149,16 @@ class AnimatedMazeGeneratorWithPattern:
             "amber":   {"wall": "\033[33m█", "pattern": "\033[93m▓\033[33m", "path": " ", "marker": "\033[93m◦\033[33m", "start": "\033[93mS\033[33m", "end": "\033[91mE\033[33m"},
         }
         
+        self.pattern_color_scheme = "default"
+        self.pattern_colors = {
+            "default": "\033[0m▓",       # Default gray
+            "magenta": "\033[95m▓\033[0m",  # Bright magenta
+            "cyan": "\033[96m▓\033[0m",     # Bright cyan  
+            "red": "\033[91m▓\033[0m",      # Bright red
+            "yellow": "\033[93m▓\033[0m",   # Bright yellow
+            "white": "\033[97m▓\033[0m",    # Bright white
+        }
+        
         self.frames: List[AnimationFrame] = []
         self.final_grid_cells = None
 
@@ -221,7 +231,9 @@ class AnimatedMazeGeneratorWithPattern:
         if not self.frames: return ""
         frame = self.frames[index]
         c = self.colors[self.color_scheme]
-        WC, PT, PC, MK, ST, EN = c["wall"], c["pattern"], c["path"], c["marker"], c["start"], c["end"]
+        WC, PC, MK, ST, EN = c["wall"], c["path"], c["marker"], c["start"], c["end"]
+        # Use separate pattern color
+        PT = self.pattern_colors.get(self.pattern_color_scheme, self.pattern_colors["default"])
         
         path_cells = set()
         if self.show_path and index == len(self.frames) - 1:

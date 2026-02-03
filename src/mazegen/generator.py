@@ -23,6 +23,8 @@ class MazeGenerator:
         self.algorithms = ["prim", "dfs"]
         self.color_schemes = ["default", "emerald", "ocean", "amber"]
         self.current_color_idx = 0
+        self.pattern_color_schemes = ["default", "magenta", "cyan", "red", "yellow", "white"]
+        self.current_pattern_color_idx = 0
         self.show_path = False
         
         self.generator = None
@@ -54,6 +56,7 @@ class MazeGenerator:
         )
         self.generator.show_path = self.show_path
         self.generator.color_scheme = self.color_schemes[self.current_color_idx]
+        self.generator.pattern_color_scheme = self.pattern_color_schemes[self.current_pattern_color_idx]
         
         algo = self.algorithms[self.current_algo_idx]
         self.last_maze = self.generator.generate(algorithm=algo)
@@ -111,9 +114,10 @@ class MazeGenerator:
                 print(f"\n1 regenerate new maze (Next: {next_algo})")
                 print("2 show/hide the path from entry to exit")
                 print("3 change maze colors")
-                print("4 quit")
+                print("4 change '42' pattern colors")
+                print("5 quit")
                 
-                choice = input("\n> enter a choice (1-4 ): ")
+                choice = input("\n> enter a choice (1-5): ")
                 
                 if choice == '1':
                     # Cycle algorithm
@@ -138,6 +142,13 @@ class MazeGenerator:
                     print("\033[2J\033[H", end="")
                     print(self.generator.render_frame_simple(self.generator.get_frame_count()-1))
                 elif choice == '4':
+                    self.current_pattern_color_idx = (self.current_pattern_color_idx + 1) % len(self.pattern_color_schemes)
+                    self.generator.pattern_color_scheme = self.pattern_color_schemes[self.current_pattern_color_idx]
+                    print(f"Pattern color changed to: {self.pattern_color_schemes[self.current_pattern_color_idx]}")
+                    # Re-render final frame with pattern color changed
+                    print("\033[2J\033[H", end="")
+                    print(self.generator.render_frame_simple(self.generator.get_frame_count()-1))
+                elif choice == '5':
                     print("\nSEE YOU SOON! ")
                     print("\033[2J\033[H", end="") 
                     print("A-MAZE-ING | 42 School\n")
