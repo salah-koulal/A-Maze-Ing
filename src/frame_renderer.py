@@ -33,6 +33,24 @@ class FrameRenderer:
         
         self.buffer = ScreenBuffer(screen_width, screen_height)
         self.mapper = MazeScreenMapper(offset_x=0, offset_y=0)
+        
+        # Color scheme (RGB values for walls)
+        self.color_scheme = "default"
+        self.color_schemes = {
+            "default": (255, 255, 255),  # White
+            "blue": (100, 150, 255),      # Light blue
+            "green": (100, 255, 150),     # Light green
+            "red": (255, 100, 100),       # Light red
+            "yellow": (255, 255, 100),    # Yellow
+            "magenta": (255, 100, 255),   # Magenta
+            "cyan": (100, 255, 255),      # Cyan
+        }
+        
+        # Path visualization
+        self.show_path = False
+        self.path_cells = set()
+        self.entry = None
+        self.exit = None
     
     def get_corner_char(self, cx, cy):
         """Calculate corner character."""
@@ -67,6 +85,36 @@ class FrameRenderer:
                 mask |= 8
 
         return BOX_CHARS[mask]
+    
+    def set_path_info(self, path_str: str, entry: tuple, exit: tuple):
+        """
+        Set path information for visualization.
+        
+        Args:
+            path_str: Path as string of directions (N, E, S, W)
+            entry: Entry coordinates (x, y)
+            exit: Exit coordinates (x, y)
+        """
+        self.entry = entry
+        self.exit = exit
+        self.path_cells = {entry}
+        
+        if not path_str:
+            return
+        
+        # Trace path to get all cells
+        x, y = entry
+        directions = {
+            'N': (0, -1),
+            'E': (1, 0),
+            'S': (0, 1),
+            'W': (-1, 0)
+        }
+        
+        for direction in path_str:
+            dx, dy = directions[direction]
+            x, y = x + dx, y + dy
+            self.path_cells.add((x, y))
     
     def render_full(self, current_cell=None, show_visited=True):
         """
@@ -119,7 +167,21 @@ class FrameRenderer:
                     cell = self.grid[y][x]
                     cx, cy = self.mapper.cell_to_screen(x, y)
                     
-                    if not cell.enabled:
+                    # Check if this cell is on the path
+                    is_on_path = self.show_path and (x, y) in self.path_cells
+                    is_entry = self.entry and (x, y) == self.entry
+                    is_exit = self.exit and (x, y) == self.exit
+                    
+                    if is_entry:
+                        # Entry marker
+                        self.buffer.set_string(cx, cy, " S ")
+                    elif is_exit:
+                        # Exit marker
+                        self.buffer.set_string(cx, cy, " E ")
+                    elif is_on_path:
+                        # Path marker
+                        self.buffer.set_string(cx, cy, " ◦ ")
+                    elif not cell.enabled:
                         # Pattern cell
                         self.buffer.set_string(cx, cy, "███")
                     elif current_cell and (x, y) == (current_cell.x, current_cell.y):
@@ -145,12 +207,24 @@ class FrameRenderer:
                         self.buffer.set_char(wx, wy, ' ')
     
     def display(self):
-        """Display the buffer to screen."""
-        from terminal_controls import move_cursor
+        """Display the buffer to screen with colors."""
+        from terminal_controls import move_cursor, set_fg, reset_color
+        
+        # Get wall color
+        r, g, b = self.color_schemes.get(self.color_scheme, (255, 255, 255))
         
         for y in range(self.buffer.height):
             move_cursor(1, y + 1)
             line = ""
             for x in range(self.buffer.width):
-                line += self.buffer.get_char(x, y)
+                char = self.buffer.get_char(x, y)
+                
+                # Check if this is a path cell (we need to map screen coords back to maze coords)
+                # For simplicity, we'll color all non-space characters with the wall color
+                if char != ' ' and char != '·':
+                    set_fg(r, g, b)
+                    line += char
+                    reset_color()
+                else:
+                    line += char
             print(line, end='', flush=True)

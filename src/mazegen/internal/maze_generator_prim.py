@@ -1,129 +1,65 @@
+"""
+Prim's maze generation algorithm.
+Uses a frontier-based approach to create perfect mazes.
+"""
+
 import random
-from typing import List, Tuple
+from typing import List, Set, Tuple
+from .maze_base import MazeGeneratorBase, Cell
 
 
-
-class Cell:
-    """Represents a single cell in the maze."""
+class PrimMazeGenerator(MazeGeneratorBase):
+    """Generate mazes using Prim's algorithm (frontier-based)."""
     
-    def __init__(self, x: int, y: int) -> None:
-        self.x = x
-        self.y = y
-        self.walls = 15
-        self.visited = False
-    
-    def has_wall(self, direction: str) -> bool:
-        """Check if wall exists in given direction."""
-        wall_bits = {'N': 0b0001, 'E': 0b0010, 'S': 0b0100, 'W': 0b1000}
-        return bool(self.walls & wall_bits[direction])
-    
-    def remove_wall(self, direction: str) -> None:
-        """Remove wall in given direction."""
-        wall_bits = {'N': 0b0001, 'E': 0b0010, 'S': 0b0100, 'W': 0b1000}
-        self.walls = self.walls & ~wall_bits[direction]
-    
-    
-class MazeGenerator:
-    """Generate mazes using Prim's algorithm."""
-    def __init__(self, width: int, height: int, seed: int | None = None) -> None:
-        self.width = width
-        self.height = height
-        
-        if seed is not None:
-            random.seed(seed)
-            
-        self.grid: List[List[Cell]] = []
-        for y in range(height):
-            row = []
-            for x in range(width):
-                row.append(Cell(x,y))
-            self.grid.append(row)
-
-    def get_cell(self, x: int, y: int) -> Cell | None:
-        """Get cell at coordinates."""
-        if 0 <= x < self.width and 0 <= y < self.height:
-            return self.grid[y][x]
-        return None
-    
-    def get_neighbors(self, cell: Cell) -> List[Tuple[Cell, str]]:
-        """Get all neighbors with their directions."""
-        neighbors = []
-        
-        if cell.y > 0:
-            neighbors.append( (self.grid[cell.y - 1][cell.x], 'N') )
-        
-        if cell.x < self.width - 1:
-            neighbors.append( (self.grid[cell.y][cell.x + 1] , 'E') )
-        
-        if cell.y < self.height - 1:
-            neighbors.append( (self.grid[cell.y + 1][cell.x] , 'S') )
-
-        if cell.x > 0:
-            neighbors.append( (self.grid[cell.y][cell.x - 1], 'W') )
-
-        return neighbors
-    
-    
-    def remove_wall_between(self, cell1: Cell, cell2: Cell, direction: str) -> None:
-        """Remove wall between two cells."""
-        cell1.remove_wall(direction)
-        
-        opposite = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
-        cell2.remove_wall(opposite[direction])
-
     def generate(self) -> List[List[Cell]]:
-        """The core Part is here :Generate maze using Prim's algorithm."""
-
-        # first we gonna pick a random start
-        start_x = random.randint(0, self.width - 1)
-        start_y = random.randint(0, self.height - 1)
-
+        """
+        Generate maze using Prim's algorithm.
+        
+        The algorithm:
+        1. Start with a random cell, mark it visited
+        2. Add all its walls to a frontier list
+        3. While frontier is not empty:
+           - Pick a random wall from frontier
+           - If the wall connects visited to unvisited cell:
+             - Remove the wall
+             - Mark the unvisited cell as visited  
+             - Add its walls to the frontier
+        
+        Returns:
+            The generated maze grid
+        """
+        # Find a valid start cell (not in pattern)
+        non_pattern_cells = [(x, y) for y in range(self.height) 
+                            for x in range(self.width) 
+                            if (x, y) not in self.pattern_cells]
+        
+        if not non_pattern_cells:
+            return self.grid
+        
+        start_x, start_y = random.choice(non_pattern_cells)
         start_cell = self.grid[start_y][start_x]
         start_cell.visited = True
         
-        
-        #List that connect VISITED rooms to UNVISITED rooms
-        
-
+        # Frontier: list of (current_cell, neighbor_cell, direction) tuples
         frontier: List[Tuple[Cell, Cell, str]] = []
         
-        # --- Example output for cell [1,1] neighbors ---:
-        # [
-        # (Cell[1,0], 'north'),  # Cell above
-        # (Cell[2,1], 'east'),   # Cell to the right
-        # (Cell[1,2], 'south'),  # Cell below
-        # (Cell[0,1], 'west')    # Cell to the left
-        # ]
         for neighbor, direction in self.get_neighbors(start_cell):
-            frontier.append( (start_cell, neighbor, direction) )
+            if not neighbor.visited:
+                frontier.append((start_cell, neighbor, direction))
         
         while frontier:
-            # Pick random wall
+            # Pick random wall from frontier
             wall_index = random.randint(0, len(frontier) - 1)
             current_cell, neighbor_cell, direction = frontier.pop(wall_index)
             
+            # If neighbor hasn't been visited, carve passage
             if not neighbor_cell.visited:
                 self.remove_wall_between(current_cell, neighbor_cell, direction)
                 neighbor_cell.visited = True
         
-            for next_neighbor, next_dir in self.get_neighbors(neighbor_cell):
-                if not next_neighbor.visited:
-                    frontier.append((neighbor_cell, next_neighbor, next_dir))
+                # Add new walls to frontier
+                for next_neighbor, next_dir in self.get_neighbors(neighbor_cell):
+                    if not next_neighbor.visited:
+                        frontier.append((neighbor_cell, next_neighbor, next_dir))
             
         return self.grid
-
-
-
-
-
-# cell = Cell(0, 0)
-# print(cell.walls)
-
-# cell.remove_wall('N')
-# print(cell.walls)
-
-# cell.remove_wall('E')
-# print(cell.walls)
-
-# print(cell.has_wall('W'))
-# print(cell.has_wall('E'))
