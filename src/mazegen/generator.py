@@ -1,3 +1,10 @@
+"""
+Main maze generator module.
+This is the high-level interface for generating and displaying mazes.
+
+For details on the algorithms, see internal/README.md
+"""
+
 import random
 import time
 from typing import List, Tuple, Any
@@ -7,37 +14,80 @@ from .internal.pattern_embedder import get_pattern_cells
 from .internal.maze_with_animation import MazeGeneratorWithAnimation
 from .internal.path_finder import find_path
 
+
 class MazeGenerator:
     """
     High-level API for maze generation and visualization.
-    Integrates multiple algorithms, animation, and pattern protection.
+    
+    This class manages:
+    - Configuration loading
+    - Algorithm selection (Prim's or DFS)
+    - Color schemes for walls and patterns
+    - Interactive menu system
+    - Animation playback
+    
+    Usage:
+        gen = MazeGenerator('config/default_config.txt')
+        gen.run()  # Start interactive mode
     """
+    
     def __init__(self, config_path: str, seed: str = None, size: Tuple[int, int] = None):
+        """
+        Initialize the maze generator.
+        
+        Args:
+            config_path: Path to configuration file
+            seed: Optional random seed (overrides config)
+            size: Optional (width, height) tuple (overrides config)
+        """
+        # Load configuration from file
         self.config = load_config(config_path)
+        
+        # Override with provided parameters
         if seed is not None:
             self.config['SEED'] = int(seed)
         if size is not None:
             self.config['WIDTH'], self.config['HEIGHT'] = size
-            
+        
+        # Algorithm settings: ["prim", "dfs"]
+        # Start with Prim's algorithm (index 0)
         self.current_algo_idx = 0
         self.algorithms = ["prim", "dfs"]
+        
+        # Color scheme settings for maze walls
         self.color_schemes = ["default", "emerald", "ocean", "amber"]
         self.current_color_idx = 0
+        
+        # Pattern color settings (for "42" pattern)
         self.pattern_color_schemes = ["default", "magenta", "cyan", "red", "yellow", "white"]
         self.current_pattern_color_idx = 0
-        self.show_path = False
         
+        # Display settings
+        self.show_path = False  # Whether to show solution path
+        
+        # The actual generator instance (created when generating)
         self.generator = None
         self.last_maze = None
 
     def generate_maze(self) -> List[List[Any]]:
         """
         Generate a new maze based on the current configuration.
-        Returns the maze grid (list of list of Cell objects).
+        
+        This method:
+        1. Gets entry/exit points from config
+        2. Generates "42" pattern coordinates
+        3. Creates a MazeGeneratorWithAnimation instance
+        4. Generates the maze using current algorithm (Prim or DFS)
+        5. Captures animation frames during generation
+        
+        Returns:
+            The generated maze grid (list of list of Cell objects)
         """
+        # Get entry and exit points from configuration
         entry = self.config.get('ENTRY', (0, 0))
         exit_coords = self.config.get('EXIT', (self.config['WIDTH']-1, self.config['HEIGHT']-1))
         
+        # Generate the "42" pattern cells to protect during maze generation
         pattern_cells = get_pattern_cells(
             self.config['WIDTH'], 
             self.config['HEIGHT'], 
@@ -45,6 +95,7 @@ class MazeGenerator:
             exit_coords=exit_coords
         )
         
+        # Create the maze generator with animation support
         self.generator = MazeGeneratorWithAnimation(
             width=self.config['WIDTH'],
             height=self.config['HEIGHT'],
@@ -54,10 +105,13 @@ class MazeGenerator:
             exit_coords=exit_coords,
             perfect=self.config.get('PERFECT', True)
         )
+        
+        # Apply current display settings
         self.generator.show_path = self.show_path
         self.generator.color_scheme = self.color_schemes[self.current_color_idx]
         self.generator.pattern_color_scheme = self.pattern_color_schemes[self.current_pattern_color_idx]
         
+        # Generate the maze using current algorithm ("prim" or "dfs")
         algo = self.algorithms[self.current_algo_idx]
         self.last_maze = self.generator.generate(algorithm=algo)
         return self.last_maze
