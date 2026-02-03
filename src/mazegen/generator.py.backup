@@ -7,24 +7,12 @@ For details on the algorithms, see internal/README.md
 
 import random
 import time
-import sys
-import os
 from typing import List, Tuple, Any
-
-# Add src directory to path for imports
-src_path = os.path.join(os.path.dirname(__file__), '..')
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
 from .internal.config_parser import load_config
 from .internal.leet_animation import leet_animation
 from .internal.pattern_embedder import get_pattern_cells
+from .internal.maze_with_animation import MazeGeneratorWithAnimation
 from .internal.path_finder import find_path
-
-# Import the animators from src directory
-from animatable_maze_adapter import AnimatableMazeGenerator
-from maze_animator import MazeAnimator
-from maze_animator_prim import PrimMazeAnimator
 
 
 class MazeGenerator:
@@ -66,25 +54,31 @@ class MazeGenerator:
         self.current_algo_idx = 0
         self.algorithms = ["prim", "dfs"]
         
+        # Color scheme settings for maze walls
+        self.color_schemes = ["default", "emerald", "ocean", "amber"]
+        self.current_color_idx = 0
+        
+        # Pattern color settings (for "42" pattern)
+        self.pattern_color_schemes = ["default", "magenta", "cyan", "red", "yellow", "white"]
+        self.current_pattern_color_idx = 0
+        
         # Display settings
         self.show_path = False  # Whether to show solution path
         
-        # The actual generator and animator instances
+        # The actual generator instance (created when generating)
         self.generator = None
-        self.animator = None
         self.last_maze = None
 
     def generate_maze(self) -> List[List[Any]]:
         """
         Generate a new maze based on the current configuration.
-        Uses real-time animation with FrameRenderer.
         
         This method:
         1. Gets entry/exit points from config
         2. Generates "42" pattern coordinates
-        3. Creates an AnimatableMazeGenerator instance
-        4. Uses appropriate animator (DFS or Prim)
-        5. Animates the generation in real-time
+        3. Creates a MazeGeneratorWithAnimation instance
+        4. Generates the maze using current algorithm (Prim or DFS)
+        5. Captures animation frames during generation
         
         Returns:
             The generated maze grid (list of list of Cell objects)
@@ -101,41 +95,34 @@ class MazeGenerator:
             exit_coords=exit_coords
         )
         
-        # Create the animatable maze generator
-        algo = self.algorithms[self.current_algo_idx]
-        self.generator = AnimatableMazeGenerator(
-            algorithm=algo,
+        # Create the maze generator with animation support
+        self.generator = MazeGeneratorWithAnimation(
             width=self.config['WIDTH'],
             height=self.config['HEIGHT'],
+            pattern_cells=pattern_cells,
             seed=self.config.get('SEED'),
-            pattern_cells=pattern_cells
+            entry=entry,
+            exit_coords=exit_coords,
+            perfect=self.config.get('PERFECT', True)
         )
         
-        # Create appropriate animator
-        if algo == 'prim':
-            self.animator = PrimMazeAnimator(self.generator)
-        else:  # dfs
-            self.animator = MazeAnimator(self.generator)
+        # Apply current display settings
+        self.generator.show_path = self.show_path
+        self.generator.color_scheme = self.color_schemes[self.current_color_idx]
+        self.generator.pattern_color_scheme = self.pattern_color_schemes[self.current_pattern_color_idx]
         
-        # Animate the generation process
-        self.animator.animate_generation(delay=0.05)
-        
-        # Store the generated maze
-        self.last_maze = self.generator.grid
+        # Generate the maze using current algorithm ("prim" or "dfs")
+        algo = self.algorithms[self.current_algo_idx]
+        self.last_maze = self.generator.generate(algorithm=algo)
         return self.last_maze
 
     def draw_maze(self, maze: List[List[Any]] = None):
         """
         Display the current state of the maze in the terminal.
-        Uses the frame renderer for consistent display.
         """
-        if self.generator and self.animator:
-            # Re-render the final maze
-            from terminal_controls import clear_screen
-            clear_screen()
-            self.animator.renderer.render_full(show_visited=True)
-            self.animator.renderer.display()
-            print("\n")
+        if self.generator and self.generator.frames:
+            # Render the last frame (fully generated maze)
+            print(self.generator.render_frame_simple(self.generator.get_frame_count() - 1))
         else:
             print("No maze generated yet. Call generate_maze() first.")
 
@@ -152,26 +139,6 @@ class MazeGenerator:
         exit_coords = self.config.get('EXIT', (self.config['WIDTH']-1, self.config['HEIGHT']-1))
         return find_path(grid_state, entry, exit_coords)
 
-    def write_to_file(self, filename: str, entry: Tuple[int, int], exit_coords: Tuple[int, int], path: str):
-        """
-        Write maze to file in hexadecimal format.
-        
-        Args:
-            filename: Output filename
-            entry: Entry coordinates
-            exit_coords: Exit coordinates  
-            path: Solution path string
-        """
-        with open(filename, 'w') as f:
-            for row in self.last_maze:
-                line = ''.join(format(cell.walls, 'X') for cell in row)
-                f.write(line + '\n')
-            
-            f.write('\n')
-            f.write(f"{entry[0]},{entry[1]}\n")
-            f.write(f"{exit_coords[0]},{exit_coords[1]}\n")
-            f.write(f"{path}\n")
-    
     def run(self):
         """
         Run the interactive maze generator loop with animation and menu.
@@ -189,23 +156,22 @@ class MazeGenerator:
             output_file = self.config.get('OUTPUT_FILE', 'maze_output.txt')
             entry = self.config.get('ENTRY', (0, 0))
             exit_coords = self.config.get('EXIT', (self.config['WIDTH']-1, self.config['HEIGHT']-1))
+            self.generator.write_to_hex_file(output_file, entry, exit_coords)
             
-            # Get solution path
-            grid_state = [[cell.walls for cell in row] for row in self.last_maze]
-            path_str = find_path(grid_state, entry, exit_coords)
-            
-            # Write to file
-            self.write_to_file(output_file, entry, exit_coords, path_str)
+            # Play animation
+            self.generator.play_animation(fps=20.0)
             
             # Menu Loop
             while True:
-                next_algo = "DFS" if self.algorithms[(self.current_algo_idx + 1) % len(self.algorithms)] == "dfs" else "Prim's"
+                next_algo = "DFS" if self.algorithms[(self.current_algo_idx + 1) % len(self.algorithms)] == "prim" else "Prim's (Default)"
                 print("\nchoices :")
                 print(f"\n1 regenerate new maze (Next: {next_algo})")
-                print("2 show current maze")
-                print("3 quit")
+                print("2 show/hide the path from entry to exit")
+                print("3 change maze colors")
+                print("4 change '42' pattern colors")
+                print("5 quit")
                 
-                choice = input("\n> enter a choice (1-3): ")
+                choice = input("\n> enter a choice (1-5): ")
                 
                 if choice == '1':
                     # Cycle algorithm
@@ -216,11 +182,27 @@ class MazeGenerator:
                         self.config['SEED'] += 1
                     else:
                         self.config['SEED'] = random.randint(1, 1000)
-                    break  # Break inner loop to regenerate
+                    break # Break inner loop to regenerate
                 elif choice == '2':
-                    # Show the maze again
-                    self.draw_maze()
+                    self.show_path = not self.show_path
+                    self.generator.show_path = self.show_path
+                    # Re-render final frame with path toggled
+                    print("\033[2J\033[H", end="")
+                    print(self.generator.render_frame_simple(self.generator.get_frame_count()-1))
                 elif choice == '3':
+                    self.current_color_idx = (self.current_color_idx + 1) % len(self.color_schemes)
+                    self.generator.color_scheme = self.color_schemes[self.current_color_idx]
+                    # Re-render final frame with color changed
+                    print("\033[2J\033[H", end="")
+                    print(self.generator.render_frame_simple(self.generator.get_frame_count()-1))
+                elif choice == '4':
+                    self.current_pattern_color_idx = (self.current_pattern_color_idx + 1) % len(self.pattern_color_schemes)
+                    self.generator.pattern_color_scheme = self.pattern_color_schemes[self.current_pattern_color_idx]
+                    print(f"Pattern color changed to: {self.pattern_color_schemes[self.current_pattern_color_idx]}")
+                    # Re-render final frame with pattern color changed
+                    print("\033[2J\033[H", end="")
+                    print(self.generator.render_frame_simple(self.generator.get_frame_count()-1))
+                elif choice == '5':
                     print("\nSEE YOU SOON! ")
                     print("\033[2J\033[H", end="") 
                     print("A-MAZE-ING | 42 School\n")
