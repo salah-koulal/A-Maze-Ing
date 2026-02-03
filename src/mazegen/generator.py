@@ -4,7 +4,7 @@ from typing import List, Tuple, Any
 from .internal.config_parser import load_config
 from .internal.leet_animation import leet_animation
 from .internal.pattern_embedder import get_pattern_cells
-from .internal.animated_maze_with_pattern import AnimatedMazeGeneratorWithPattern
+from .internal.maze_with_animation import MazeGeneratorWithAnimation
 from .internal.path_finder import find_path
 
 class MazeGenerator:
@@ -45,7 +45,7 @@ class MazeGenerator:
             exit_coords=exit_coords
         )
         
-        self.generator = AnimatedMazeGeneratorWithPattern(
+        self.generator = MazeGeneratorWithAnimation(
             width=self.config['WIDTH'],
             height=self.config['HEIGHT'],
             pattern_cells=pattern_cells,
