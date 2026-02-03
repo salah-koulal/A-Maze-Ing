@@ -91,7 +91,7 @@ class MazeGenerator:
                     x = center_x + px
                     y = center_y + py
 
-                    self.grid[y][x].walls = 15
+                    self.grid[y][x].walls = 15 
                     self.grid[y][x].visited = True
                     self.grid[y][x].enabled = False
 
