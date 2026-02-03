@@ -66,6 +66,10 @@ class MazeGenerator:
         self.current_algo_idx = 0
         self.algorithms = ["prim", "dfs"]
         
+        # Color scheme settings
+        self.color_schemes = ["default", "blue", "green", "red", "yellow", "magenta", "cyan"]
+        self.current_color_idx = 0
+        
         # Display settings
         self.show_path = False  # Whether to show solution path
         
@@ -73,6 +77,7 @@ class MazeGenerator:
         self.generator = None
         self.animator = None
         self.last_maze = None
+        self.last_path = ""  # Store the solution path
 
     def generate_maze(self) -> List[List[Any]]:
         """
@@ -117,11 +122,25 @@ class MazeGenerator:
         else:  # dfs
             self.animator = MazeAnimator(self.generator)
         
+        # Set color scheme on renderer
+        self.animator.renderer.color_scheme = self.color_schemes[self.current_color_idx]
+        
         # Animate the generation process
         self.animator.animate_generation(delay=0.05)
         
         # Store the generated maze
         self.last_maze = self.generator.grid
+        
+        # Compute and store the solution path
+        entry = self.config.get('ENTRY', (0, 0))
+        exit_coords = self.config.get('EXIT', (self.config['WIDTH']-1, self.config['HEIGHT']-1))
+        grid_state = [[cell.walls for cell in row] for row in self.last_maze]
+        self.last_path = find_path(grid_state, entry, exit_coords)
+        
+        # Set path info on renderer
+        self.animator.renderer.set_path_info(self.last_path, entry, exit_coords)
+        self.animator.renderer.show_path = self.show_path
+        
         return self.last_maze
 
     def draw_maze(self, maze: List[List[Any]] = None):
@@ -130,6 +149,10 @@ class MazeGenerator:
         Uses the frame renderer for consistent display.
         """
         if self.generator and self.animator:
+            # Update renderer settings
+            self.animator.renderer.color_scheme = self.color_schemes[self.current_color_idx]
+            self.animator.renderer.show_path = self.show_path
+            
             # Re-render the final maze
             from terminal_controls import clear_screen
             clear_screen()
@@ -203,9 +226,11 @@ class MazeGenerator:
                 print("\nchoices :")
                 print(f"\n1 regenerate new maze (Next: {next_algo})")
                 print("2 show current maze")
-                print("3 quit")
+                print("3 change maze wall colors")
+                print("4 show/hide path from entry to exit")
+                print("5 quit")
                 
-                choice = input("\n> enter a choice (1-3): ")
+                choice = input("\n> enter a choice (1-5): ")
                 
                 if choice == '1':
                     # Cycle algorithm
@@ -221,6 +246,18 @@ class MazeGenerator:
                     # Show the maze again
                     self.draw_maze()
                 elif choice == '3':
+                    # Cycle through color schemes
+                    self.current_color_idx = (self.current_color_idx + 1) % len(self.color_schemes)
+                    current_color = self.color_schemes[self.current_color_idx]
+                    print(f"\nMaze color changed to: {current_color}")
+                    self.draw_maze()
+                elif choice == '4':
+                    # Toggle path visibility
+                    self.show_path = not self.show_path
+                    status = "visible" if self.show_path else "hidden"
+                    print(f"\nPath is now: {status}")
+                    self.draw_maze()
+                elif choice == '5':
                     print("\nSEE YOU SOON! ")
                     print("\033[2J\033[H", end="") 
                     print("A-MAZE-ING | 42 School\n")
