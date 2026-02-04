@@ -11,6 +11,7 @@ class Cell:
         self.y = y
         self.walls = 15
         self.visited = False
+        self.enabled = True
     
     def has_wall(self, direction: str) -> bool:
         """Check if wall exists in given direction."""
@@ -62,6 +63,31 @@ class MazeGenerator:
             neighbors.append( (self.grid[cell.y][cell.x - 1], 'W') )
 
         return neighbors
+    
+    def _get_unvisited_neighbors(self, cell: Cell) -> List[Tuple[Cell, str]]:
+        """
+        Get unvisited neighbors (for animation compatibility).
+        Checks for bounds, 'enabled' status, and visited status.
+        """
+        neighbors = []
+        # Directions mapping: name -> (dx, dy)
+        directions = {
+            'N': (0, -1),
+            'E': (1, 0),
+            'S': (0, 1),
+            'W': (-1, 0)
+        }
+        
+        for direction, (dx, dy) in directions.items():
+            nx, ny = cell.x + dx, cell.y + dy
+            neighbor = self.get_cell(nx, ny)
+            if neighbor and getattr(neighbor, 'enabled', True) and not neighbor.visited:
+                neighbors.append((neighbor, direction))
+        return neighbors
+
+    def _carve_passage(self, cell1: Cell, cell2: Cell, direction: str) -> None:
+        """Alias for remove_wall_between for animation compatibility."""
+        self.remove_wall_between(cell1, cell2, direction)
     
     
     def remove_wall_between(self, cell1: Cell, cell2: Cell, direction: str) -> None:

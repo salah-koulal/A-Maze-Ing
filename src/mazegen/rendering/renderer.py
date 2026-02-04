@@ -1,4 +1,4 @@
-from maze_generator_DFS import MazeGenerator
+from ..algorithms.dfs import MazeGenerator
 import time
 import os
 

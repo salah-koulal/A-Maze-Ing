@@ -49,7 +49,6 @@ class ConfigParser:
     def _convert_types(self) -> None:
         self.config["WIDTH"] = int(self.config["WIDTH"])
         self.config["HEIGHT"] = int(self.config["HEIGHT"])
-
         entry_parts = self.config["ENTRY"].split(",")
         if len(entry_parts) != 2:
             raise ValueError("Entry must be in format 'x,y'")
@@ -66,8 +65,8 @@ class ConfigParser:
             self.config["SEED"] = int(self.config["SEED"])
 
     def _validate_values(self) -> None:
-        if self.config["HEIGHT"] <= 0 or self.config["WIDTH"] <= 0:
-            raise ValueError("WIDTH and HEIGHT must be positive")
+        if self.config["HEIGHT"] <= 2 or self.config["WIDTH"] <= 2:
+            raise ValueError("WIDTH and HEIGHT must be greater than 2")
         entry_x, entry_y = self.config["ENTRY"]
 
         if not (0 <= entry_x < self.config["WIDTH"] and

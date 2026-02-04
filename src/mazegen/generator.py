@@ -1,11 +1,11 @@
 import random
 import time
 from typing import List, Tuple, Any
-from .internal.config_parser import load_config
-from .internal.leet_animation import leet_animation
-from .internal.pattern_embedder import get_pattern_cells
-from .internal.animated_maze_with_pattern import AnimatedMazeGeneratorWithPattern
-from .internal.path_finder import find_path
+from .utils.config_parser import load_config
+from .rendering.leet_animation import leet_animation
+from .utils.pattern_embedder import get_pattern_cells
+from .rendering.animated_maze_with_pattern import AnimatedMazeGeneratorWithPattern
+from .algorithms.path_finder import find_path
 
 class MazeGenerator:
     """
@@ -63,7 +63,7 @@ class MazeGenerator:
         """
         Display the current state of the maze in the terminal.
         """
-        if self.generator and self.generator.frames:
+        if self.generator and self.generator.get_frame_count() > 0:
             # Render the last frame (fully generated maze)
             print(self.generator.render_frame_simple(self.generator.get_frame_count() - 1))
         else:
@@ -140,7 +140,7 @@ class MazeGenerator:
                 elif choice == '4':
                     print("\nSEE YOU SOON! ")
                     print("\033[2J\033[H", end="") 
-                    print("A-MAZE-ING | 42 School\n")
+                    print("A-MAZE-ING | By Skoulal & wabbad\n")
                     return
                 else:
                     print("Invalid choice, try again.")

@@ -1,5 +1,5 @@
 from maze_generator_DFS import MazeGenerator
-from maze_animator import MazeAnimator
+from mazegen.internal.maze_animator import MazeAnimator
 
 # Create maze
 gen = MazeGenerator(20, 12, 9)

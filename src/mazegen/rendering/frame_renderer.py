@@ -3,8 +3,8 @@ Frame-based maze renderer.
 Renders maze state to a screen buffer.
 """
 
-from screen_buffer import ScreenBuffer
-from maze_screen_mapper import MazeScreenMapper
+from .screen_buffer import ScreenBuffer
+from .screen_mapper import MazeScreenMapper
 
 BOX_CHARS = {
     0: ' ', 1: '║', 2: '║', 3: '║',
@@ -146,7 +146,7 @@ class FrameRenderer:
     
     def display(self):
         """Display the buffer to screen."""
-        from terminal_controls import move_cursor
+        from ..utils.terminal_controls import move_cursor
         
         for y in range(self.buffer.height):
             move_cursor(1, y + 1)

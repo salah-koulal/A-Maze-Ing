@@ -25,7 +25,7 @@ def slide_in(text):
 
 def leet_animation():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, "leet.txt")
+    file_path = os.path.join(script_dir, "1337.txt")
     text = read_text_file(file_path)
     clear_screen()
     slide_in(text)

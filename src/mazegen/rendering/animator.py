@@ -4,8 +4,8 @@ Maze generation animator.
 
 import time
 import random
-from terminal_controls import clear_screen, hide_cursor, show_cursor
-from frame_renderer import FrameRenderer
+from ..utils.terminal_controls import clear_screen, hide_cursor, show_cursor
+from .frame_renderer import FrameRenderer
 
 class MazeAnimator:
     def __init__(self, maze_generator):
