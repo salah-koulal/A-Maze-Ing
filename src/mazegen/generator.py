@@ -21,7 +21,7 @@ class MazeGenerator:
             
         self.current_algo_idx = 0
         self.algorithms = ["prim", "dfs"]
-        self.color_schemes = ["default", "emerald", "ocean", "amber"]
+        self.color_schemes = ["subject", "vivid", "emerald", "ocean", "amber", "default"]
         self.current_color_idx = 0
         self.show_path = False
         
@@ -89,17 +89,17 @@ class MazeGenerator:
         leet_animation()
         time.sleep(2)
         
-        while True:
-            algo_name = "Prim's" if self.algorithms[self.current_algo_idx] == "prim" else "DFS"
-            print(f"Generating {self.config['WIDTH']}x{self.config['HEIGHT']} maze using {algo_name} algorithm...")
-            
+        while True:            
             self.generate_maze()
             
             # Write output file (mandatory part of subject)
             output_file = self.config.get('OUTPUT_FILE', 'maze_output.txt')
             entry = self.config.get('ENTRY', (0, 0))
             exit_coords = self.config.get('EXIT', (self.config['WIDTH']-1, self.config['HEIGHT']-1))
-            self.generator.write_to_hex_file(output_file, entry, exit_coords)
+            
+            # Calculate path for output file
+            solution_path = self.get_solution()
+            self.generator.write_to_hex_file(output_file, entry, exit_coords, path=solution_path)
             
             # Play animation
             self.generator.play_animation(fps=20.0)

@@ -13,6 +13,16 @@ BOX_CHARS = {
     12: '═', 13: '╩', 14: '╦', 15: '╬',
 }
 
+COLORS = {
+    "default": {"wall": "\033[0m", "path": "\033[0m", "entry": "\033[0m", "exit": "\033[0m"},
+    "subject": {"wall": "\033[36m", "path": "\033[93m", "entry": "\033[92m", "exit": "\033[91m"},
+    "vivid":   {"wall": "\033[44m\033[37m", "path": "\033[43m\033[30m", "entry": "\033[42m\033[30m", "exit": "\033[41m\033[37m"},
+    "emerald": {"wall": "\033[32m", "path": "\033[92m", "entry": "\033[42m\033[30m", "exit": "\033[42m\033[30m"},
+    "ocean":   {"wall": "\033[34m", "path": "\033[94m", "entry": "\033[44m\033[37m", "exit": "\033[44m\033[37m"},
+    "amber":   {"wall": "\033[33m", "path": "\033[93m", "entry": "\033[43m\033[30m", "exit": "\033[43m\033[30m"},
+}
+RESET = "\033[0m"
+
 class FrameRenderer:
     def __init__(self, maze_generator):
         """
@@ -32,7 +42,13 @@ class FrameRenderer:
         screen_height = self.height * 2 + 1
         
         self.buffer = ScreenBuffer(screen_width, screen_height)
+        self.color_buffer = {} # (x,y) -> color_code
         self.mapper = MazeScreenMapper(offset_x=0, offset_y=0)
+        
+        self.entry = getattr(maze_generator, 'entry', None)
+        self.exit = getattr(maze_generator, 'exit', None)
+        self.path_cells = getattr(maze_generator, 'path_cells', set())
+        self.color_scheme = getattr(maze_generator, 'color_scheme', 'default')
     
     def get_corner_char(self, cx, cy):
         """Calculate corner character."""
@@ -68,6 +84,21 @@ class FrameRenderer:
 
         return BOX_CHARS[mask]
     
+    def set_color(self, x, y, type_key):
+        """Set color for a coordinate."""
+        scheme = COLORS.get(self.color_scheme, COLORS["default"])
+        color = scheme.get(type_key, "")
+        if color != "\033[0m":
+            self.color_buffer[(x, y)] = color
+
+    def set_string_color(self, x, y, s, type_key):
+        """Set color for a string starting at x,y."""
+        scheme = COLORS.get(self.color_scheme, COLORS["default"])
+        color = scheme.get(type_key, "")
+        if color != "\033[0m":
+            for i in range(len(s)):
+                self.color_buffer[(x + i, y)] = color
+
     def render_full(self, current_cell=None, show_visited=True):
         """
         Render complete maze to buffer.
@@ -78,6 +109,7 @@ class FrameRenderer:
         """
         # Clear buffer
         self.buffer.clear()
+        self.color_buffer.clear()
         
         # Draw all corners and walls
         for y in range(self.height + 1):
@@ -86,13 +118,18 @@ class FrameRenderer:
                 sx, sy = self.mapper.corner_to_screen(x, y)
                 corner_char = self.get_corner_char(x, y)
                 self.buffer.set_char(sx, sy, corner_char)
+                self.set_color(sx, sy, "wall")
                 
                 # Horizontal wall
                 wx, wy = self.mapper.wall_north_to_screen(x, y)
                 if y < self.height and self.grid[y][x].has_wall('N'):
-                    self.buffer.set_string(wx, wy, "═══")
+                    s = "═══"
+                    self.buffer.set_string(wx, wy, s)
+                    self.set_string_color(wx, wy, s, "wall")
                 elif y > 0 and self.grid[y - 1][x].has_wall('S'):
-                    self.buffer.set_string(wx, wy, "═══")
+                    s = "═══"
+                    self.buffer.set_string(wx, wy, s)
+                    self.set_string_color(wx, wy, s, "wall")
                 else:
                     self.buffer.set_string(wx, wy, "   ")
             
@@ -100,6 +137,7 @@ class FrameRenderer:
             sx, sy = self.mapper.corner_to_screen(self.width, y)
             corner_char = self.get_corner_char(self.width, y)
             self.buffer.set_char(sx, sy, corner_char)
+            self.set_color(sx, sy, "wall")
         
         # Draw cell contents and vertical walls
         for y in range(self.height):
@@ -109,8 +147,10 @@ class FrameRenderer:
                     wx, wy = self.mapper.wall_west_to_screen(x, y)
                     if self.grid[y][x].has_wall('W'):
                         self.buffer.set_char(wx, wy, '║')
+                        self.set_color(wx, wy, "wall")
                     elif x > 0 and self.grid[y][x - 1].has_wall('E'):
                         self.buffer.set_char(wx, wy, '║')
+                        self.set_color(wx, wy, "wall")
                     else:
                         self.buffer.set_char(wx, wy, ' ')
                 
@@ -121,7 +161,24 @@ class FrameRenderer:
                     
                     if not cell.enabled:
                         # Pattern cell
-                        self.buffer.set_string(cx, cy, "███")
+                        s = "███"
+                        self.buffer.set_string(cx, cy, s)
+                        self.set_string_color(cx, cy, s, "wall")
+                    elif self.entry and (x, y) == self.entry:
+                        # Entry
+                        s = " E "
+                        self.buffer.set_string(cx, cy, s)
+                        self.set_string_color(cx, cy, s, "entry")
+                    elif self.exit and (x, y) == self.exit:
+                        # Exit
+                        s = " X "
+                        self.buffer.set_string(cx, cy, s)
+                        self.set_string_color(cx, cy, s, "exit")
+                    elif hasattr(self, 'path_cells') and self.path_cells and (x, y) in self.path_cells:
+                        # Path - show distinct marker
+                        s = " * "
+                        self.buffer.set_string(cx, cy, s)
+                        self.set_string_color(cx, cy, s, "path")
                     elif current_cell and (x, y) == (current_cell.x, current_cell.y):
                         # Current cell
                         self.buffer.set_string(cx, cy, "■■■")
@@ -130,7 +187,9 @@ class FrameRenderer:
                         self.buffer.set_string(cx, cy, " · ")
                     elif not show_visited or not cell.visited:
                         # Hidden/unvisited
-                        self.buffer.set_string(cx, cy, "███")
+                        s = "███"
+                        self.buffer.set_string(cx, cy, s)
+                        self.set_string_color(cx, cy, s, "wall")
                     else:
                         # Empty
                         self.buffer.set_string(cx, cy, "   ")
@@ -141,16 +200,43 @@ class FrameRenderer:
                     wy = self.mapper.offset_y + y * self.mapper.cell_height + 1
                     if self.grid[y][x - 1].has_wall('E'):
                         self.buffer.set_char(wx, wy, '║')
+                        self.set_color(wx, wy, "wall")
                     else:
                         self.buffer.set_char(wx, wy, ' ')
     
+    def render_to_string(self):
+        """Return the buffer content as a string with ANSI colors."""
+        RESET = "\033[0m"
+        lines = []
+        current_color = None
+        
+        for y in range(self.buffer.height):
+            line = ""
+            for x in range(self.buffer.width):
+                char = self.buffer.get_char(x, y)
+                color = self.color_buffer.get((x, y))
+                
+                if color != current_color:
+                    if current_color:
+                        line += RESET
+                    if color:
+                        line += color
+                    current_color = color
+                
+                line += char
+            
+            if current_color:
+                line += RESET
+                current_color = None
+            lines.append(line)
+            
+        return "\n".join(lines)
+
     def display(self):
         """Display the buffer to screen."""
         from ..utils.terminal_controls import move_cursor
         
-        for y in range(self.buffer.height):
+        # Move cursor and print line by line to avoid flickering/scrolling issues
+        for y, line in enumerate(self.render_to_string().split('\n')):
             move_cursor(1, y + 1)
-            line = ""
-            for x in range(self.buffer.width):
-                line += self.buffer.get_char(x, y)
             print(line, end='', flush=True)

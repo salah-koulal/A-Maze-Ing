@@ -12,11 +12,11 @@ from typing import List, Set, Tuple
 # Compact "42" pattern (7x5) - fits even in 10x10 mazes
 # 1 = Unbreakable wall, 0 = Normal maze cell
 PATTERN_42 = [
-    [1, 0, 0, 0, 1, 1, 1],  # Row 0: 4: 1.1  2: 111
-    [1, 0, 0, 0, 0, 0, 1],  # Row 1: 4: 1.1  2: ..1
-    [1, 1, 1, 0, 1, 1, 1],  # Row 2: 4: 111  2: 111
-    [0, 0, 1, 0, 1, 0, 0],  # Row 3: 4: ..1  2: 1..
-    [0, 0, 1, 0, 1, 1, 1],  # Row 4: 4: ..1  2: 111
+    [1, 0, 0, 0, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 0, 1, 1, 1],
+    [0, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 1, 1],
 ]
 
 
@@ -30,8 +30,11 @@ def get_pattern_cells(width: int, height: int, pattern: List[List[int]] = PATTER
     
     if pattern_width == 0 or pattern_height == 0:
         return set()
+
+    # Check if pattern fits in maze
+    if pattern_width > width or pattern_height > height:
+        return set()
     
-    # Calculate center position
     center_x, center_y = width // 2, height // 2
     offset_x, offset_y = center_x - pattern_width // 2, center_y - pattern_height // 2
     

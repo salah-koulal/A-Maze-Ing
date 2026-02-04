@@ -59,7 +59,13 @@ class MazeGenerator:
         current.remove_wall(direction)
 
         opposits = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
+        opposits = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
         neighbor.remove_wall(opposits[direction])
+    
+    def remove_wall_between(self, cell1, cell2, direction):
+        """Alias for _carve_passage to match interface."""
+        self._carve_passage(cell1, cell2, direction)
+
     def apply_42_pattern(self):
  
         pattern = [
@@ -98,7 +104,7 @@ class MazeGenerator:
         return True
 
     
-    def generate(self, start_x= 0, start_y= 0):
+    def generate(self, start_x= 0, start_y= 0, callback=None):
         for row in self.grid:
             for cell in row:
                 if cell.walls != 15:
@@ -108,6 +114,8 @@ class MazeGenerator:
         stack = []
         stack.append(start_cell)
         start_cell.visited = True
+        
+        if callback: callback(start_cell)
 
         while len(stack) > 0:
             start_cell = stack[-1]
@@ -119,6 +127,7 @@ class MazeGenerator:
                 neighbor, direction = random.choice(neighbors)
                 self._carve_passage(start_cell, neighbor, direction)
                 neighbor.visited = True
+                if callback: callback(neighbor)
                 stack.append(neighbor)
         return self.grid
 

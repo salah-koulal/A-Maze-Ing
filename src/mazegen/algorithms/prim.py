@@ -97,12 +97,14 @@ class MazeGenerator:
         opposite = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
         cell2.remove_wall(opposite[direction])
 
-    def generate(self) -> List[List[Cell]]:
+    def generate(self, start_x: int = None, start_y: int = None, callback=None) -> List[List[Cell]]:
         """The core Part is here :Generate maze using Prim's algorithm."""
 
         # first we gonna pick a random start
-        start_x = random.randint(0, self.width - 1)
-        start_y = random.randint(0, self.height - 1)
+        if start_x is None:
+            start_x = random.randint(0, self.width - 1)
+        if start_y is None:
+            start_y = random.randint(0, self.height - 1)
 
         start_cell = self.grid[start_y][start_x]
         start_cell.visited = True
@@ -122,6 +124,8 @@ class MazeGenerator:
         # ]
         for neighbor, direction in self.get_neighbors(start_cell):
             frontier.append( (start_cell, neighbor, direction) )
+            
+        if callback: callback(start_cell)
         
         while frontier:
             # Pick random wall
@@ -131,6 +135,8 @@ class MazeGenerator:
             if not neighbor_cell.visited:
                 self.remove_wall_between(current_cell, neighbor_cell, direction)
                 neighbor_cell.visited = True
+                
+                if callback: callback(neighbor_cell)
         
             for next_neighbor, next_dir in self.get_neighbors(neighbor_cell):
                 if not next_neighbor.visited:

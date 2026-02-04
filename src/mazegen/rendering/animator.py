@@ -44,29 +44,15 @@ class MazeAnimator:
         self.renderer.display()
         time.sleep(0.5)
         
-        # Start generation
-        start_cell = grid[start_y][start_x]
-        stack = [start_cell]
-        start_cell.visited = True
-
-        # Main loop
-        while len(stack) > 0:
-            current = stack[-1]
-            neighbors = self.generator._get_unvisited_neighbors(current)
-
-            if len(neighbors) == 0:
-                stack.pop()
-            else:
-                neighbor, direction = random.choice(neighbors)
-                self.generator._carve_passage(current, neighbor, direction)
-                neighbor.visited = True
-                stack.append(neighbor)
-            
-            # Render current state
-            self.renderer.render_full(current_cell=current, show_visited=True)
+        def update_frame(current_cell):
+            self.renderer.render_full(current_cell=current_cell, show_visited=True)
             self.renderer.display()
-            
             time.sleep(delay)
+            
+        # Start generation using the generator's logic
+        self.generator.generate(start_x=start_x, start_y=start_y, callback=update_frame)
+            
+
         
         # Final render
         self.renderer.render_full(show_visited=True)

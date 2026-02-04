@@ -37,3 +37,4 @@ dist/
 !requirements.txt
 !config/*.txt
 !src/*.txt
+!src/mazegen/rendering/1337.txt
