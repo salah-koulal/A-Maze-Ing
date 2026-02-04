@@ -21,7 +21,7 @@ class MazeGenerator:
             
         self.current_algo_idx = 0
         self.algorithms = ["prim", "dfs"]
-        self.color_schemes = ["subject", "vivid", "emerald", "ocean", "amber", "default"]
+        self.color_schemes = ["default", "subject", "vivid", "emerald", "ocean", "amber"]
         self.current_color_idx = 0
         self.show_path = False
         
@@ -139,7 +139,7 @@ class MazeGenerator:
                     print(self.generator.render_frame_simple(self.generator.get_frame_count()-1))
                 elif choice == '4':
                     print("\nSEE YOU SOON! ")
-                    print("\033[2J\033[H", end="") 
+                    print("\033[2J\033[H", end="")
                     print("A-MAZE-ING | By Skoulal & wabbad\n")
                     return
                 else:

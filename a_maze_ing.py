@@ -7,22 +7,18 @@ Main entry point for the program using the mazegen package.
 import sys
 from src.mazegen import MazeGenerator
 
+
 def main() -> None:
     """Main program entry point."""
     if len(sys.argv) != 2:
         print("Usage: python3 a_maze_ing.py <config_file>")
         sys.exit(1)
-    
-    config_file = sys.argv[1]
-    
-    try:
-        # Initialize the generator from the config file
-        # The MazeGenerator class handles seed/size overrides and the main loop.
-        generator = MazeGenerator(config_file)
-        
-        # Run the interactive maze generation loop
-        generator.run()
 
+    config_file = sys.argv[1]
+
+    try:
+        generator = MazeGenerator(config_file)
+        generator.run()
     except FileNotFoundError:
         print(f"Error: Configuration file '{config_file}' not found.")
         sys.exit(1)

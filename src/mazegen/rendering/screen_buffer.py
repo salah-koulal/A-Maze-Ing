@@ -5,7 +5,8 @@ class ScreenBuffer:
         self.buffer = [[' ' for _ in range(width)] for _ in range(height)]
 
     def clear(self):
-        self.buffer = [[' ' for _ in range(self.width)] for _ in range(self.height)]
+        self.buffer = [[' ' for _ in range(self.width)]
+                       for _ in range(self.height)]
 
     def set_char(self, x, y, char):
         if 0 <= x < self.width and 0 <= y < self.height:

@@ -65,8 +65,8 @@ class ConfigParser:
             self.config["SEED"] = int(self.config["SEED"])
 
     def _validate_values(self) -> None:
-        if self.config["HEIGHT"] <= 2 or self.config["WIDTH"] <= 2:
-            raise ValueError("WIDTH and HEIGHT must be greater than 2")
+        if self.config["WIDTH"] <= 7 or self.config["HEIGHT"] <= 5:
+            raise ValueError("Maze too small for '42' pattern!")
         entry_x, entry_y = self.config["ENTRY"]
 
         if not (0 <= entry_x < self.config["WIDTH"] and

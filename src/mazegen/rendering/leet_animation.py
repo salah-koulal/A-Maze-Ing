@@ -1,8 +1,10 @@
 import time
 import os
 
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
+
 
 def read_text_file(filename):
     try:
@@ -11,7 +13,7 @@ def read_text_file(filename):
     except FileNotFoundError:
         return "File not found!"
 
-# Typewriter effect
+
 def slide_in(text):
     lines = text.split('\n')
     max_len = max(len(line) for line in lines) if lines else 0
@@ -22,6 +24,7 @@ def slide_in(text):
             spaces = " " * (max_len - i)
             print(spaces + line[:i])
         time.sleep(0.05)
+
 
 def leet_animation():
     script_dir = os.path.dirname(os.path.abspath(__file__))
