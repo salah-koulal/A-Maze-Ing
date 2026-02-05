@@ -2,8 +2,8 @@
 # Lines starting with # are comments
 
 # Maze dimensions
-WIDTH=12
-HEIGHT=10
+WIDTH=30
+HEIGHT=30
 
 # Entry and exit coordinates (x,y)
 ENTRY=0,0
@@ -13,7 +13,7 @@ EXIT=9,9
 OUTPUT_FILE=maze_output.txt
 
 # Perfect maze (exactly one path between entry and exit)
-PERFECT=True
+PERFECT=False
 
 # Random seed for reproducibility (optional)
-SEED=-1
+SEED=42

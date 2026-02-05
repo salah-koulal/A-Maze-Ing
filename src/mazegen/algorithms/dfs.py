@@ -1,43 +1,44 @@
 import random
+from typing import List, Tuple, Optional, Any, Callable
 
 
 class Cell:
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int) -> None:
         self.x = x
         self.y = y
         self.walls = 15
         self.visited = False
         self.enabled = True
 
-    def has_wall(self, point):
+    def has_wall(self, point: str) -> bool:
         wall = {'N': 0b0001, 'E': 0b0010, 'S': 0b0100, 'W': 0b1000}
         return bool(self.walls & wall[point])
 
-    def remove_wall(self, point):
+    def remove_wall(self, point: str) -> None:
         wall = {'N': 0b0001, 'E': 0b0010, 'S': 0b0100, 'W': 0b1000}
         self.walls = self.walls & ~wall[point]
 
 
 class MazeGenerator:
-    def __init__(self, width, height, seed=42):
+    def __init__(self, width: int, height: int, seed: Any = 42) -> None:
         self.height = height
         self.width = width
         self.seed = seed
         random.seed(seed)
 
-        self.grid = []
+        self.grid: List[List[Cell]] = []
         for y in range(height):
             row = []
             for x in range(width):
                 row.append(Cell(x, y))
             self.grid.append(row)
 
-    def _get_cell(self, x, y):
+    def _get_cell(self, x: int, y: int) -> Optional[Cell]:
         if 0 <= x < self.width and 0 <= y < self.height:
             return self.grid[y][x]
         return None
 
-    def _get_unvisited_neighbors(self, cell):
+    def _get_unvisited_neighbors(self, cell: Cell) -> List[Tuple[Cell, str]]:
         neighbors = []
         directions = {
             'N': (0, -1),
@@ -54,18 +55,20 @@ class MazeGenerator:
                 neighbors.append((neighbor, direction))
         return neighbors
 
-    def _carve_passage(self, current, neighbor, direction):
+    def _carve_passage(self, current: Cell, neighbor: Cell,
+                       direction: str) -> None:
         current.remove_wall(direction)
 
         opposits = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
         neighbor.remove_wall(opposits[direction])
 
-    def remove_wall_between(self, cell1, cell2, direction):
+    def remove_wall_between(
+        self, cell1: Cell, cell2: Cell, direction: str
+    ) -> None:
         """Alias for _carve_passage to match interface."""
         self._carve_passage(cell1, cell2, direction)
 
-    def apply_42_pattern(self):
-
+    def apply_42_pattern(self) -> bool:
         pattern = [
             [1, 0, 0, 0, 1, 1, 1],
             [1, 0, 0, 0, 0, 0, 1],
@@ -99,7 +102,10 @@ class MazeGenerator:
 
         return True
 
-    def generate(self, start_x=0, start_y=0, callback=None):
+    def generate(self, start_x: int = 0, start_y: int = 0,
+                 callback: Optional[Callable[[Cell], None]] = None) -> (
+                     List[List[Cell]]
+                 ):
         for row in self.grid:
             for cell in row:
                 if cell.walls != 15:
@@ -114,14 +120,14 @@ class MazeGenerator:
             callback(start_cell)
 
         while len(stack) > 0:
-            start_cell = stack[-1]
-            neighbors = self._get_unvisited_neighbors(start_cell)
+            current_cell = stack[-1]
+            neighbors = self._get_unvisited_neighbors(current_cell)
 
             if len(neighbors) == 0:
                 stack.pop()
             else:
                 neighbor, direction = random.choice(neighbors)
-                self._carve_passage(start_cell, neighbor, direction)
+                self._carve_passage(current_cell, neighbor, direction)
                 neighbor.visited = True
                 if callback:
                     callback(neighbor)

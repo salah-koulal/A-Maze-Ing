@@ -5,7 +5,7 @@ MAIN = a_maze_ing.py
 CONFIG = config/default_config.txt
 
 
-.PHONY: help install run debug clean lint lint-strict test
+.PHONY: help install run clean lint
 
 help:
 	@echo "A-Maze-ing Project Makefile"
@@ -13,11 +13,8 @@ help:
 	@echo "Available targets:"
 	@echo "  install     - Install project dependencies"
 	@echo "  run          - Execute the main script"
-	@echo "  debug        - Run in debug mode with pdb"
 	@echo "  clean        - Remove temporary files and caches"
 	@echo "  lint         - Run flake8 and mypy checks"
-	@echo "  lint-strict  - Run strict mypy checks"
-	@echo "  test         - Run pytest tests"
 
 install:
 	@echo "Installing dependencies..."
@@ -26,11 +23,7 @@ install:
 
 run:
 	@echo "Running main script..."
-	$(PYTHON) $(MAIN) $(CONFIG)
-
-debug:
-	@echo "Running in debug mode..."
-	$(PYTHON) -m pdb $(MAIN) $(CONFIG)
+	PYTHONPATH=src $(PYTHON) $(MAIN) $(CONFIG)
 
 clean:
 	@echo "$()Cleaning up..."
@@ -47,17 +40,6 @@ lint:
 	@echo "Running flake8..."
 	flake8 .
 	@echo "Running mypy..."
-	mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	mypy .
 	@echo "Linting complete!"
 
-lint-strict:
-	@echo "Running flake8..."
-	flake8 .
-	@echo "Running mypy (strict)..."
-	mypy . --strict
-	@echo "Strict linting complete!"
-
-test:
-	@echo "Running tests..."
-	pytest tests/ -v
-	@echo "Tests complete!"

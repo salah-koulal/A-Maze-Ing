@@ -2,11 +2,11 @@ import time
 import os
 
 
-def clear_screen():
+def clear_screen() -> None:
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def read_text_file(filename):
+def read_text_file(filename: str) -> str:
     try:
         with open(filename, 'r') as f:
             return f.read()
@@ -14,7 +14,7 @@ def read_text_file(filename):
         return "File not found!"
 
 
-def slide_in(text):
+def slide_in(text: str) -> None:
     lines = text.split('\n')
     max_len = max(len(line) for line in lines) if lines else 0
 
@@ -26,7 +26,7 @@ def slide_in(text):
         time.sleep(0.05)
 
 
-def leet_animation():
+def leet_animation() -> None:
     script_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(script_dir, "1337.txt")
     text = read_text_file(file_path)

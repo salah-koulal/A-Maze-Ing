@@ -3,12 +3,13 @@ Maze generation animator.
 """
 
 import time
+from typing import Any
 from ..utils.terminal_controls import clear_screen, hide_cursor, show_cursor
 from .frame_renderer import FrameRenderer
 
 
 class MazeAnimator:
-    def __init__(self, maze_generator):
+    def __init__(self, maze_generator: Any) -> None:
         """
         Initialize animator.
 
@@ -18,7 +19,8 @@ class MazeAnimator:
         self.generator = maze_generator
         self.renderer = FrameRenderer(maze_generator)
 
-    def animate_generation(self, start_x=0, start_y=0, delay=0.05):
+    def animate_generation(self, start_x: int = 0, start_y: int = 0,
+                           delay: float = 0.05) -> None:
         """
         Animate the maze generation process.
 
@@ -44,7 +46,7 @@ class MazeAnimator:
         self.renderer.display()
         time.sleep(0.5)
 
-        def update_frame(current_cell):
+        def update_frame(current_cell: Any) -> None:
             self.renderer.render_full(
                 current_cell=current_cell, show_visited=True)
             self.renderer.display()

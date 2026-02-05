@@ -3,6 +3,7 @@ Frame-based maze renderer.
 Renders maze state to a screen buffer.
 """
 
+from typing import Dict, Tuple, Any, Optional, Set, List
 from .screen_buffer import ScreenBuffer
 from .screen_mapper import MazeScreenMapper
 
@@ -13,7 +14,7 @@ BOX_CHARS = {
     12: '═', 13: '╩', 14: '╦', 15: '╬',
 }
 
-COLORS = {
+COLORS: Dict[str, Dict[str, str]] = {
     "default": {
         "wall": "\033[0m", "path": "\033[0m",
         "entry": "\033[0m", "exit": "\033[0m"
@@ -43,7 +44,7 @@ RESET = "\033[0m"
 
 
 class FrameRenderer:
-    def __init__(self, maze_generator):
+    def __init__(self, maze_generator: Any) -> None:
         """
         Initialize renderer.
 
@@ -51,9 +52,9 @@ class FrameRenderer:
             maze_generator: MazeGenerator instance
         """
         self.generator = maze_generator
-        self.width = maze_generator.width
-        self.height = maze_generator.height
-        self.grid = maze_generator.grid
+        self.width: int = maze_generator.width
+        self.height: int = maze_generator.height
+        self.grid: List[List[Any]] = maze_generator.grid
 
         # Calculate screen size needed
         # Each cell is 4x2, plus borders
@@ -61,15 +62,23 @@ class FrameRenderer:
         screen_height = self.height * 2 + 1
 
         self.buffer = ScreenBuffer(screen_width, screen_height)
-        self.color_buffer = {}  # (x,y) -> color_type_key (e.g. 'wall', 'path')
+        self.color_buffer: Dict[Tuple[int, int], str] = {}
         self.mapper = MazeScreenMapper(offset_x=0, offset_y=0)
 
-        self.entry = getattr(maze_generator, 'entry', None)
-        self.exit = getattr(maze_generator, 'exit', None)
-        self.path_cells = getattr(maze_generator, 'path_cells', set())
-        self.color_scheme = getattr(maze_generator, 'color_scheme', 'default')
+        self.entry: Optional[Tuple[int, int]] = getattr(
+            maze_generator, 'entry', None
+        )
+        self.exit: Optional[Tuple[int, int]] = getattr(
+            maze_generator, 'exit', None
+        )
+        self.path_cells: Set[Tuple[int, int]] = getattr(
+            maze_generator, 'path_cells', set()
+        )
+        self.color_scheme: str = getattr(
+            maze_generator, 'color_scheme', 'default'
+        )
 
-    def get_corner_char(self, cx, cy):
+    def get_corner_char(self, cx: int, cy: int) -> str:
         """Calculate corner character."""
         grid = self.grid
         width = self.width
@@ -103,16 +112,17 @@ class FrameRenderer:
 
         return BOX_CHARS[mask]
 
-    def set_color(self, x, y, type_key):
+    def set_color(self, x: int, y: int, type_key: str) -> None:
         """Set color type for a coordinate."""
         self.color_buffer[(x, y)] = type_key
 
-    def set_string_color(self, x, y, s, type_key):
+    def set_string_color(self, x: int, y: int, s: str, type_key: str) -> None:
         """Set color type for a string starting at x,y."""
         for i in range(len(s)):
             self.color_buffer[(x + i, y)] = type_key
 
-    def render_full(self, current_cell=None, show_visited=True):
+    def render_full(self, current_cell: Optional[Any] = None,
+                    show_visited: bool = True) -> None:
         """
         Render complete maze to buffer.
 
@@ -219,7 +229,7 @@ class FrameRenderer:
                     else:
                         self.buffer.set_char(wx, wy, ' ')
 
-    def render_to_string(self):
+    def render_to_string(self) -> str:
         """Return the buffer content as a string with ANSI colors."""
         # Live color scheme lookup
         scheme_name = getattr(
@@ -236,8 +246,10 @@ class FrameRenderer:
             for x in range(self.buffer.width):
                 char = self.buffer.get_char(x, y)
                 type_key = self.color_buffer.get((x, y))
-                color_code = scheme.get(
-                    type_key, "\033[0m") if type_key else "\033[0m"
+                color_code = (
+                    scheme.get(type_key, "\033[0m")
+                    if type_key else "\033[0m"
+                )
 
                 if color_code != current_color_code:
                     if current_color_code:
@@ -255,7 +267,7 @@ class FrameRenderer:
 
         return "\n".join(lines)
 
-    def display(self):
+    def display(self) -> None:
         """Display the buffer to screen."""
         from ..utils.terminal_controls import move_cursor
 
