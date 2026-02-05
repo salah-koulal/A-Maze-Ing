@@ -5,30 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mazegen"
 version = "1.0.0"
-description = "A-Maze-ing: Maze Generator and Visualizer"
+description = "A-Maze-ing maze generator package"
+authors = [
+    {name = "skoulal", email = "yskoulal@student.1337.ma"},
+    {name = "wabbad", email = "wabbad@student.1337.ma"}
+]
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [
-  {name = "skoulal"},
-  {name = "wabbad"}
-]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-]
+license = {text = "MIT"}
+
+dependencies = []
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["mazegen*"]
-
-[tool.setuptools.package-data]
-"mazegen.internal" = ["*.txt"]
- 
- [tool.mypy]
- warn_return_any = true
-
- warn_unused_ignores = true
- ignore_missing_imports = true
- disallow_untyped_defs = true
- check_untyped_defs = true
-
