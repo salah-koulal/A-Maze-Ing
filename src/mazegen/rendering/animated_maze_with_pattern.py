@@ -4,6 +4,8 @@ from ..algorithms.dfs import MazeGenerator as DFSGenerator
 from .animator import MazeAnimator
 from .frame_renderer import FrameRenderer
 from ..utils.file_writer import save_to_file
+import random
+from ..algorithms.path_finder import find_path
 
 
 class AnimatedMazeGeneratorWithPattern:
@@ -109,9 +111,6 @@ class AnimatedMazeGeneratorWithPattern:
         return self.grid if self.grid else []
 
     def _make_imperfect(self) -> None:
-        import random
-        from ..algorithms.path_finder import find_path
-
         if not self.grid:
             return
 
@@ -184,7 +183,7 @@ class AnimatedMazeGeneratorWithPattern:
         if self.grid:
             save_to_file(self.grid, output_file, entry, exit_coords, path=path)
 
-    def play_animation(self, fps: float = 20.0) -> None:
+    def play_animation(self, fps: float = 15.0) -> None:
         if not self.animator or not self.grid:
             return
 

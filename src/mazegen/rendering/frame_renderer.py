@@ -56,8 +56,6 @@ class FrameRenderer:
         self.height: int = maze_generator.height
         self.grid: List[List[Any]] = maze_generator.grid
 
-        # Calculate screen size needed
-        # Each cell is 4x2, plus borders
         screen_width = self.width * 4 + 1
         screen_height = self.height * 2 + 1
 
@@ -130,20 +128,16 @@ class FrameRenderer:
             current_cell: Cell to highlight as current
             show_visited: Whether to show visited cells
         """
-        # Clear buffer
         self.buffer.clear()
         self.color_buffer.clear()
 
-        # Draw all corners and walls
         for y in range(self.height + 1):
             for x in range(self.width):
-                # Corner
                 sx, sy = self.mapper.corner_to_screen(x, y)
                 corner_char = self.get_corner_char(x, y)
                 self.buffer.set_char(sx, sy, corner_char)
                 self.set_color(sx, sy, "wall")
 
-                # Horizontal wall
                 wx, wy = self.mapper.wall_north_to_screen(x, y)
                 if y < self.height and self.grid[y][x].has_wall('N'):
                     s = "═══"
@@ -156,16 +150,13 @@ class FrameRenderer:
                 else:
                     self.buffer.set_string(wx, wy, "   ")
 
-            # Last corner on right
             sx, sy = self.mapper.corner_to_screen(self.width, y)
             corner_char = self.get_corner_char(self.width, y)
             self.buffer.set_char(sx, sy, corner_char)
             self.set_color(sx, sy, "wall")
 
-        # Draw cell contents and vertical walls
         for y in range(self.height):
             for x in range(self.width + 1):
-                # Vertical wall
                 if x < self.width:
                     wx, wy = self.mapper.wall_west_to_screen(x, y)
                     if self.grid[y][x].has_wall('W'):
@@ -177,49 +168,39 @@ class FrameRenderer:
                     else:
                         self.buffer.set_char(wx, wy, ' ')
 
-                # Cell content
                 if x < self.width:
                     cell = self.grid[y][x]
                     cx, cy = self.mapper.cell_to_screen(x, y)
 
                     if not cell.enabled:
-                        # Pattern cell
                         s = "███"
                         self.buffer.set_string(cx, cy, s)
                         self.set_string_color(cx, cy, s, "wall")
                     elif self.entry and (x, y) == self.entry:
-                        # Entry
                         s = " E "
                         self.buffer.set_string(cx, cy, s)
                         self.set_string_color(cx, cy, s, "entry")
                     elif self.exit and (x, y) == self.exit:
-                        # Exit
                         s = " X "
                         self.buffer.set_string(cx, cy, s)
                         self.set_string_color(cx, cy, s, "exit")
                     elif (hasattr(self, 'path_cells') and self.path_cells and
                           (x, y) in self.path_cells):
-                        # Path - show distinct marker
                         s = " * "
                         self.buffer.set_string(cx, cy, s)
                         self.set_string_color(cx, cy, s, "path")
                     elif (current_cell and
                           (x, y) == (current_cell.x, current_cell.y)):
-                        # Current cell
                         self.buffer.set_string(cx, cy, "■■■")
                     elif show_visited and cell.visited:
-                        # Visited cell
                         self.buffer.set_string(cx, cy, " · ")
                     elif not show_visited or not cell.visited:
-                        # Hidden/unvisited
                         s = "███"
                         self.buffer.set_string(cx, cy, s)
                         self.set_string_color(cx, cy, s, "wall")
                     else:
-                        # Empty
                         self.buffer.set_string(cx, cy, "   ")
 
-                # Right edge wall
                 if x == self.width:
                     wx = self.mapper.offset_x + x * self.mapper.cell_width
                     wy = self.mapper.offset_y + y * self.mapper.cell_height + 1
@@ -231,7 +212,6 @@ class FrameRenderer:
 
     def render_to_string(self) -> str:
         """Return the buffer content as a string with ANSI colors."""
-        # Live color scheme lookup
         scheme_name = getattr(
             self.generator,
             'color_scheme',

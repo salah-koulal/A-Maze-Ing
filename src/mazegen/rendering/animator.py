@@ -31,20 +31,17 @@ class MazeAnimator:
         """
         grid = self.generator.grid
 
-        # Reset
         for row in grid:
             for cell in row:
                 if cell.walls != 15:
                     cell.visited = False
 
-        # Setup
         clear_screen()
         hide_cursor()
 
-        # Initial render - everything solid
         self.renderer.render_full(show_visited=False)
         self.renderer.display()
-        time.sleep(0.5)
+        time.sleep(0.05)
 
         def update_frame(current_cell: Any) -> None:
             self.renderer.render_full(
@@ -52,13 +49,11 @@ class MazeAnimator:
             self.renderer.display()
             time.sleep(delay)
 
-        # Start generation using the generator's logic
         self.generator.generate(
             start_x=start_x,
             start_y=start_y,
             callback=update_frame)
 
-        # Final render
         self.renderer.render_full(show_visited=True)
         self.renderer.display()
 

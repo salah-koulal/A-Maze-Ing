@@ -40,6 +40,10 @@ lint:
 	@echo "Running flake8..."
 	flake8 .
 	@echo "Running mypy..."
-	mypy .
+	mypy . --warn-return-any \
+		--warn-unused-ignores \
+		--ignore-missing-imports \
+		--disallow-untyped-defs \
+		--check-untyped-defs
 	@echo "Linting complete!"
 

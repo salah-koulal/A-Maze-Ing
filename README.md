@@ -124,7 +124,7 @@ generator.run()
 ## Team & Project Management
 
 ### Roles
-- **[skoulal] (Salah eddine Koulal)**: Core algorithm implementation, Prim's logic, and hex output formatting, DFS path finding algorithm.
+- **[skoulal] (Salah eddine Koulal)**: Core algorithm implementation, Prim's logic, and hex output formatting, BFS path finding algorithm.
 - **[wabbad] (walid)**: Visualization system, animation playback, and Maze generation using DFS.
 
 ### Project Evolution
@@ -132,9 +132,20 @@ generator.run()
 - **Evolution**: Switched to Prim's Algorithm to better support the "42" pattern requirement and create more visually interesting mazes. Added a frame-by-frame animation system as a bonus feature.
 
 ### Resources
+
+#### Documentation
 - [Prim's Algorithm - Maze Generation](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Randomized_Prim's_algorithm)
+- [Box-Drawing Characters](https://en.wikipedia.org/wiki/Box-drawing_characters)
+- [Mazes for Programmers (Jamis Buck)](https://www.kufunda.net/publicdocs/Mazes%20for%20Programmers%20Code%20Your%20Own%20Twisty%20Little%20Passages%20(Jamis%20Buck).pdf)
 - [42 Subject PDF](A-maze-ing_subject.pdf)
-- **AI Usage**: Used for refactoring the rendering engine to support multi-character ASCII frames and for validating the hex bitmask logic against the subject requirements.
+
+#### Video Tutorials
+- [Maze Generation Algorithm Visualization](https://www.youtube.com/watch?v=p9m2LHBW81M)
+- [Prim's Algorithm Explained](https://www.youtube.com/watch?v=JavJqJHLo_M)
+- [Maze Solving Algorithms](https://www.youtube.com/watch?v=u4QmAIoo4i0)
+
+#### AI Usage
+AI tools were used for guidance and debugging assistance during development.
 
 ### Tools Used
 - **Git**: Version control

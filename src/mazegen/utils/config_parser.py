@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Tuple
 
 
 class ConfigParser:
@@ -22,7 +22,7 @@ class ConfigParser:
         self.filepath = filepath
         self.config: Dict[str, Any] = {}
 
-    def _parse_line(self, line: str) -> tuple[str, str] | None:
+    def _parse_line(self, line: str) -> Optional[Tuple[str, str]]:
         """
         Parse a single line from the config file.
 
@@ -65,7 +65,7 @@ class ConfigParser:
             self.config["SEED"] = int(self.config["SEED"])
 
     def _validate_values(self) -> None:
-        if self.config["WIDTH"] <= 7 or self.config["HEIGHT"] <= 5:
+        if self.config["WIDTH"] <= 8 or self.config["HEIGHT"] <= 8:
             raise ValueError("Maze too small for '42' pattern!")
         entry_x, entry_y = self.config["ENTRY"]
 
@@ -114,7 +114,7 @@ def get_default_config() -> Dict[str, Any]:
     }
 
 
-def load_config(filepath: str | None = None) -> Dict[str, Any]:
+def load_config(filepath: Optional[str] = None) -> Dict[str, Any]:
     """
     Load and parse a configuration file or return defaults.
 

@@ -23,6 +23,7 @@ class MazeGenerator:
             self.config['SEED'] = int(seed)
         if size is not None:
             self.config['WIDTH'], self.config['HEIGHT'] = size
+            self.config['EXIT'] = (size[0] - 1, size[1] - 1)
 
         self.current_algo_idx = 0
         self.algorithms = ["prim", "dfs"]
@@ -112,23 +113,20 @@ class MazeGenerator:
                 self.config['WIDTH'] - 1, self.config['HEIGHT'] - 1
             ))
 
-            # Calculate path for output file
             solution_path = self.get_solution()
             if self.generator:
                 self.generator.write_to_hex_file(
                     output_file, entry, exit_coords, path=solution_path
                 )
 
-            # Play animation
             if self.generator:
                 self.generator.play_animation(fps=20.0)
 
-            # Menu Loop
             while True:
                 next_algo = (
                     "DFS" if self.algorithms[
                         (self.current_algo_idx + 1) % len(self.algorithms)
-                    ] == "prim" else "Prim's (Default)"
+                    ] == "prim" else "Prim's"
                 )
                 print("\nchoices :")
                 print(f"\n1 regenerate new maze (Next: {next_algo})")
@@ -139,22 +137,19 @@ class MazeGenerator:
                 choice = input("\n> enter a choice (1-4 ): ")
 
                 if choice == '1':
-                    # Cycle algorithm
                     self.current_algo_idx = (
                         self.current_algo_idx + 1
                     ) % len(self.algorithms)
 
-                    # Update seed for new maze
                     if self.config.get('SEED'):
-                        self.config['SEED'] += 1
+                        self.config['SEED'] += 0
                     else:
                         self.config['SEED'] = random.randint(1, 1000)
-                    break  # Break inner loop to regenerate
+                    break
                 elif choice == '2':
                     self.show_path = not self.show_path
                     if self.generator:
                         self.generator.show_path = self.show_path
-                        # Re-render final frame with path toggled
                         print("\033[2J\033[H", end="")
                         print(self.generator.render_frame_simple(
                             self.generator.get_frame_count() - 1
@@ -167,7 +162,6 @@ class MazeGenerator:
                         self.generator.color_scheme = self.color_schemes[
                             self.current_color_idx
                         ]
-                        # Re-render final frame with color changed
                         print("\033[2J\033[H", end="")
                         print(self.generator.render_frame_simple(
                             self.generator.get_frame_count() - 1

@@ -22,23 +22,3 @@ def hide_cursor() -> None:
 
 def show_cursor() -> None:
     write_ansi("\x1b[?25h")
-
-
-def save_cursor() -> None:
-    write_ansi("\x1b[s")
-
-
-def restore_cursor() -> None:
-    write_ansi("\x1b[u")
-
-
-def set_fg(r: int, g: int, b: int) -> None:
-    write_ansi(f"\x1b[38;2;{r};{g};{b}m")
-
-
-def set_bg(r: int, g: int, b: int) -> None:
-    write_ansi(f"\x1b[48;2;{r};{g};{b}m")
-
-
-def reset_color() -> None:
-    write_ansi("\x1b[0m")

@@ -1,9 +1,7 @@
+from mazegen.utils.terminal_controls import hide_cursor
 import time
 import os
-
-
-def clear_screen() -> None:
-    os.system('cls' if os.name == 'nt' else 'clear')
+from ..utils.terminal_controls import clear_screen
 
 
 def read_text_file(filename: str) -> str:
@@ -31,4 +29,5 @@ def leet_animation() -> None:
     file_path = os.path.join(script_dir, "1337.txt")
     text = read_text_file(file_path)
     clear_screen()
+    hide_cursor()
     slide_in(text)

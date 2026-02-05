@@ -68,40 +68,6 @@ class MazeGenerator:
         """Alias for _carve_passage to match interface."""
         self._carve_passage(cell1, cell2, direction)
 
-    def apply_42_pattern(self) -> bool:
-        pattern = [
-            [1, 0, 0, 0, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 0, 1, 1, 1],
-            [0, 0, 1, 0, 1, 0, 0],
-            [0, 0, 1, 0, 1, 1, 1]
-        ]
-
-        pattern_height = 5
-        pattern_width = 7
-
-        try:
-            if self.width < pattern_width or self.height < pattern_height:
-                raise ValueError("Maze too small for pattern")
-        except ValueError:
-            print("The maze IS too small !")
-            return False
-
-        center_x = (self.width - pattern_width) // 2
-        center_y = (self.height - pattern_height) // 2
-
-        for py in range(pattern_height):
-            for px in range(pattern_width):
-                if pattern[py][px] == 1:
-                    x = center_x + px
-                    y = center_y + py
-
-                    self.grid[y][x].walls = 15
-                    self.grid[y][x].visited = True
-                    self.grid[y][x].enabled = False
-
-        return True
-
     def generate(self, start_x: int = 0, start_y: int = 0,
                  callback: Optional[Callable[[Cell], None]] = None) -> (
                      List[List[Cell]]
