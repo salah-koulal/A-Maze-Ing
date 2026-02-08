@@ -208,38 +208,152 @@ class AnimatedMazeGeneratorWithPattern:
 
     def render_frame_simple(self, frame_idx: int) -> str:
         path_cells: Set[Tuple[int, int]] = set()
+        path_directions: dict[Tuple[int, int], Tuple[str, ...]] = {}
+
         if self.show_path and self.grid:
             from ..algorithms.path_finder import find_path
             grid_state = [[c.walls for c in row] for row in self.grid]
             path_str = find_path(grid_state, self.entry, self.exit_coords)
+
+            # Build path coordinates list
+            path_coords = [self.entry]
             cx, cy = self.entry
             for direction in path_str:
                 dx, dy = {
                     'N': (0, -1), 'E': (1, 0), 'S': (0, 1), 'W': (-1, 0)
                 }[direction]
                 cx, cy = cx + dx, cy + dy
-                path_cells.add((cx, cy))
+                path_coords.append((cx, cy))
 
-        if not self._renderer and self.grid:
+            # Compute directions for each cell
+            opposite = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
+            for i, coord in enumerate(path_coords):
+                dirs: List[str] = []
+                # Direction we came from (previous cell -> this cell)
+                if i > 0:
+                    prev = path_coords[i - 1]
+                    dx, dy = coord[0] - prev[0], coord[1] - prev[1]
+                    from_dir = {(0, -1): 'N', (1, 0): 'E',
+                                (0, 1): 'S', (-1, 0): 'W'}[(dx, dy)]
+                    dirs.append(opposite[from_dir])  # came FROM this direction
+                # Direction we're going to (this cell -> next cell)
+                if i < len(path_coords) - 1:
+                    next_c = path_coords[i + 1]
+                    dx, dy = next_c[0] - coord[0], next_c[1] - coord[1]
+                    to_dir = {(0, -1): 'N', (1, 0): 'E',
+                              (0, 1): 'S', (-1, 0): 'W'}[(dx, dy)]
+                    dirs.append(to_dir)
+
+                path_cells.add(coord)
+                path_directions[coord] = tuple(dirs)
+
+        if self.grid:
             class GenWrapper:
                 def __init__(self, grid: List[List[Any]], width: int,
                              height: int, entry: Tuple[int, int],
                              exit_coords: Tuple[int, int],
-                             path_cells: Set[Tuple[int, int]],
+                             p_cells: Set[Tuple[int, int]],
+                             p_dirs: dict[Tuple[int, int], Tuple[str, ...]],
                              color_scheme: str):
                     self.grid, self.width, self.height = grid, width, height
                     self.entry, self.exit = entry, exit_coords
-                    self.path_cells = path_cells
+                    self.path_cells = p_cells
+                    self.path_directions = p_dirs
                     self.color_scheme = color_scheme
             self._renderer = FrameRenderer(GenWrapper(
                 self.grid, self.width, self.height, self.entry,
-                self.exit_coords, path_cells, self.color_scheme
+                self.exit_coords, path_cells, path_directions,
+                self.color_scheme
             ))
 
         if self._renderer:
             self._renderer.render_full(show_visited=True)
             return self._renderer.render_to_string()
         return ""
+
+    def animate_path(self, delay: float = 0.05) -> None:
+        """
+        Animate the path finding from entry to exit.
+        Shows the path being drawn cell by cell smoothly.
+        """
+        if not self.grid:
+            return
+
+        from ..utils.terminal_controls import (
+            hide_cursor, show_cursor, move_cursor
+        )
+        from ..algorithms.path_finder import find_path
+        import time
+
+        grid_state = [[c.walls for c in row] for row in self.grid]
+        path_str = find_path(grid_state, self.entry, self.exit_coords)
+
+        # Build full path coordinates
+        path_coords = [self.entry]
+        cx, cy = self.entry
+        for direction in path_str:
+            dx, dy = {
+                'N': (0, -1), 'E': (1, 0), 'S': (0, 1), 'W': (-1, 0)
+            }[direction]
+            cx, cy = cx + dx, cy + dy
+            path_coords.append((cx, cy))
+
+        hide_cursor()
+
+        # Animate path cell by cell
+        animated_cells: Set[Tuple[int, int]] = set()
+        animated_dirs: dict[Tuple[int, int], Tuple[str, ...]] = {}
+        opposite = {'N': 'S', 'S': 'N', 'E': 'W', 'W': 'E'}
+
+        for i, coord in enumerate(path_coords):
+            # Skip entry and exit (they have their own markers)
+            if coord == self.entry or coord == self.exit_coords:
+                continue
+
+            # Compute direction for this cell
+            dirs: List[str] = []
+            if i > 0:
+                prev = path_coords[i - 1]
+                dx, dy = coord[0] - prev[0], coord[1] - prev[1]
+                from_dir = {(0, -1): 'N', (1, 0): 'E',
+                            (0, 1): 'S', (-1, 0): 'W'}[(dx, dy)]
+                dirs.append(opposite[from_dir])
+            if i < len(path_coords) - 1:
+                next_c = path_coords[i + 1]
+                dx, dy = next_c[0] - coord[0], next_c[1] - coord[1]
+                to_dir = {(0, -1): 'N', (1, 0): 'E',
+                          (0, 1): 'S', (-1, 0): 'W'}[(dx, dy)]
+                dirs.append(to_dir)
+
+            animated_cells.add(coord)
+            animated_dirs[coord] = tuple(dirs)
+
+            # Create wrapper with current animated cells
+            class GenWrapper:
+                def __init__(self, grid: List[List[Any]], width: int,
+                             height: int, entry: Tuple[int, int],
+                             exit_coords: Tuple[int, int],
+                             p_cells: Set[Tuple[int, int]],
+                             p_dirs: dict[Tuple[int, int], Tuple[str, ...]],
+                             color_scheme: str):
+                    self.grid, self.width, self.height = grid, width, height
+                    self.entry, self.exit = entry, exit_coords
+                    self.path_cells = p_cells
+                    self.path_directions = p_dirs
+                    self.color_scheme = color_scheme
+
+            renderer = FrameRenderer(GenWrapper(
+                self.grid, self.width, self.height, self.entry,
+                self.exit_coords, animated_cells.copy(), animated_dirs.copy(),
+                self.color_scheme
+            ))
+            renderer.render_full(show_visited=True)
+            move_cursor(1, 1)
+            print(renderer.render_to_string(), end='', flush=True)
+            time.sleep(delay)
+
+        show_cursor()
+        print()
 
     def get_frame_count(self) -> int:
         return 1

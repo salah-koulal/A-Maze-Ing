@@ -25,10 +25,9 @@ def main() -> None:
     except ValueError as e:
         print(f"Error in configuration: {e}")
         sys.exit(1)
-    except Exception as e:
+    except BaseException as e:
         print(f"An unexpected error occurred: {e}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

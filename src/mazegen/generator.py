@@ -100,7 +100,7 @@ class MazeGenerator:
         """
         Run the interactive maze generator loop with animation and menu.
         """
-        leet_animation()
+        # leet_animation()
         time.sleep(2)
 
         while True:
@@ -120,16 +120,16 @@ class MazeGenerator:
                 )
 
             if self.generator:
-                self.generator.play_animation(fps=20.0)
+                self.generator.play_animation(fps=7000000000000.0)
 
             while True:
-                next_algo = (
-                    "DFS" if self.algorithms[
-                        (self.current_algo_idx + 1) % len(self.algorithms)
-                    ] == "prim" else "Prim's"
-                )
+                # next_algo = (
+                #     "DFS" if self.algorithms[
+                #         (self.current_algo_idx + 1) % len(self.algorithms)
+                #     ] == "prim" else "Prim's"
+                # )
                 print("\nchoices :")
-                print(f"\n1 regenerate new maze (Next: {next_algo})")
+                print(f"\n1 regenerate new maze :")
                 print("2 show/hide the path from entry to exit")
                 print("3 change maze colors")
                 print("4 quit")
@@ -151,9 +151,14 @@ class MazeGenerator:
                     if self.generator:
                         self.generator.show_path = self.show_path
                         print("\033[2J\033[H", end="")
-                        print(self.generator.render_frame_simple(
-                            self.generator.get_frame_count() - 1
-                        ))
+                        if self.show_path:
+                            # Animate path smoothly when showing
+                            self.generator.animate_path(delay=0.03)
+                        else:
+                            # Just render without path
+                            print(self.generator.render_frame_simple(
+                                self.generator.get_frame_count() - 1
+                            ))
                 elif choice == '3':
                     self.current_color_idx = (
                         self.current_color_idx + 1

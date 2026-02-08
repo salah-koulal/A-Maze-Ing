@@ -186,7 +186,7 @@ class FrameRenderer:
                         self.set_string_color(cx, cy, s, "exit")
                     elif (hasattr(self, 'path_cells') and self.path_cells and
                           (x, y) in self.path_cells):
-                        s = " * "
+                        s = " █ "
                         self.buffer.set_string(cx, cy, s)
                         self.set_string_color(cx, cy, s, "path")
                     elif (current_cell and
