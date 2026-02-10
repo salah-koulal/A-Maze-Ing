@@ -1,7 +1,6 @@
-from mazegen.utils.terminal_controls import hide_cursor
+from ..utils.terminal_controls import hide_cursor,clear_screen
 import time
 import os
-from ..utils.terminal_controls import clear_screen
 
 
 def read_text_file(filename: str) -> str:

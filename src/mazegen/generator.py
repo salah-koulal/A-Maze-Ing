@@ -100,13 +100,12 @@ class MazeGenerator:
         """
         Run the interactive maze generator loop with animation and menu.
         """
-        # leet_animation()
+        leet_animation()
         time.sleep(2)
 
         while True:
             self.generate_maze()
 
-            # Write output file (mandatory part of subject)
             output_file = self.config.get('OUTPUT_FILE', 'maze_output.txt')
             entry = self.config.get('ENTRY', (0, 0))
             exit_coords = self.config.get('EXIT', (
@@ -120,7 +119,7 @@ class MazeGenerator:
                 )
 
             if self.generator:
-                self.generator.play_animation(fps=7000000000000.0)
+                self.generator.play_animation(fps=60.0)
 
             while True:
                 # next_algo = (
