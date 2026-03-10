@@ -1,12 +1,20 @@
 """
 Screen buffer for tracking what's drawn.
 Avoids redrawing unchanged parts.
+
+This is a REAL-TIME BUFFER (not frame storage):
+- Single 2D array that gets OVERWRITTEN each frame
+- Used for immediate display, not for history
+- Memory efficient (only stores current state)
 """
 
 class ScreenBuffer:
     def __init__(self, width, height):
         """
         Initialize buffer.
+        
+        Creates a 2D array of characters for the screen.
+        This buffer is REUSED for each frame - it's not a frame history!
         
         Args:
             width: Screen width in characters
@@ -15,7 +23,8 @@ class ScreenBuffer:
         self.width = width
         self.height = height
         
-        # 2D array of characters
+        # 2D array of characters - THE BUFFER
+        # This holds the current screen state only
         self.buffer = []
         for y in range(height):
             row = []
@@ -26,6 +35,8 @@ class ScreenBuffer:
     def set_char(self, x, y, char):
         """
         Set character at position.
+        
+        This WRITES to the buffer - filling it with content.
         
         Args:
             x: Column (0-indexed)
@@ -39,6 +50,8 @@ class ScreenBuffer:
         """
         Set string starting at position.
         
+        This WRITES multiple characters to the buffer.
+        
         Args:
             x: Starting column
             y: Row
@@ -48,13 +61,22 @@ class ScreenBuffer:
             self.set_char(x + i, y, string[i])
     
     def get_char(self, x, y):
-        """Get character at position."""
+        """
+        Get character at position.
+        
+        This READS from the buffer - for display.
+        """
         if 0 <= y < self.height and 0 <= x < self.width:
             return self.buffer[y][x]
         return ' '
     
     def clear(self):
-        """Clear buffer to spaces."""
+        """
+        Clear buffer to spaces.
+        
+        This RESETS the buffer for the next frame.
+        Called at the start of each render cycle.
+        """
         for y in range(self.height):
             for x in range(self.width):
                 self.buffer[y][x] = ' '

@@ -120,47 +120,53 @@ class FrameRenderer:
         """
         Render complete maze to buffer.
         
+        This is HOW WE FILL THE SCREEN BUFFER:
+        1. Clear the buffer (reset to spaces)
+        2. Loop through maze grid
+        3. Write characters to buffer using set_char() and set_string()
+        4. Buffer is now ready to display
+        
         Args:
             current_cell: Cell to highlight as current
             show_visited: Whether to show visited cells
         """
-        # Clear buffer
+        # STEP 1: Clear buffer (prepare for new content)
         self.buffer.clear()
         
-        # Draw all corners and walls
+        # STEP 2: Draw all corners and walls to buffer
         for y in range(self.height + 1):
             for x in range(self.width):
                 # Corner
                 sx, sy = self.mapper.corner_to_screen(x, y)
                 corner_char = self.get_corner_char(x, y)
-                self.buffer.set_char(sx, sy, corner_char)
+                self.buffer.set_char(sx, sy, corner_char)  # WRITE to buffer
                 
                 # Horizontal wall
                 wx, wy = self.mapper.wall_north_to_screen(x, y)
                 if y < self.height and self.grid[y][x].has_wall('N'):
-                    self.buffer.set_string(wx, wy, "═══")
+                    self.buffer.set_string(wx, wy, "═══")  # WRITE to buffer
                 elif y > 0 and self.grid[y - 1][x].has_wall('S'):
-                    self.buffer.set_string(wx, wy, "═══")
+                    self.buffer.set_string(wx, wy, "═══")  # WRITE to buffer
                 else:
-                    self.buffer.set_string(wx, wy, "   ")
+                    self.buffer.set_string(wx, wy, "   ")  # WRITE to buffer
             
             # Last corner on right
             sx, sy = self.mapper.corner_to_screen(self.width, y)
             corner_char = self.get_corner_char(self.width, y)
             self.buffer.set_char(sx, sy, corner_char)
         
-        # Draw cell contents and vertical walls
+        # STEP 3: Draw cell contents and vertical walls to buffer
         for y in range(self.height):
             for x in range(self.width + 1):
                 # Vertical wall
                 if x < self.width:
                     wx, wy = self.mapper.wall_west_to_screen(x, y)
                     if self.grid[y][x].has_wall('W'):
-                        self.buffer.set_char(wx, wy, '║')
+                        self.buffer.set_char(wx, wy, '║')  # WRITE to buffer
                     elif x > 0 and self.grid[y][x - 1].has_wall('E'):
-                        self.buffer.set_char(wx, wy, '║')
+                        self.buffer.set_char(wx, wy, '║')  # WRITE to buffer
                     else:
-                        self.buffer.set_char(wx, wy, ' ')
+                        self.buffer.set_char(wx, wy, ' ')  # WRITE to buffer
                 
                 # Cell content
                 if x < self.width:
@@ -207,17 +213,26 @@ class FrameRenderer:
                         self.buffer.set_char(wx, wy, ' ')
     
     def display(self):
-        """Display the buffer to screen with colors."""
+        """
+        Display the buffer to screen with colors.
+        
+        This is HOW WE PRINT THE BUFFER:
+        1. Loop through buffer array
+        2. Read each character with get_char()
+        3. Apply colors if needed
+        4. Print to terminal
+        """
         from terminal_controls import move_cursor, set_fg, reset_color
         
         # Get wall color
         r, g, b = self.color_schemes.get(self.color_scheme, (255, 255, 255))
         
+        # Loop through buffer and print to screen
         for y in range(self.buffer.height):
             move_cursor(1, y + 1)
             line = ""
             for x in range(self.buffer.width):
-                char = self.buffer.get_char(x, y)
+                char = self.buffer.get_char(x, y)  # READ from buffer
                 
                 # Check if this is a path cell (we need to map screen coords back to maze coords)
                 # For simplicity, we'll color all non-space characters with the wall color
@@ -227,4 +242,4 @@ class FrameRenderer:
                     reset_color()
                 else:
                     line += char
-            print(line, end='', flush=True)
+            print(line, end='', flush=True)  # PRINT to terminal

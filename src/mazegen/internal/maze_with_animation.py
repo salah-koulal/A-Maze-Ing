@@ -82,15 +82,24 @@ class MazeGeneratorWithAnimation:
         """
         Capture current state as an animation frame.
         
+        This is HOW WE FILL THE ANIMATION BUFFER:
+        1. Read the current maze state from the generator
+        2. Create a snapshot (AnimationFrame object)
+        3. Add it to self.frames list (the animation buffer)
+        
         Args:
             generator: The maze generator instance
             description: Description of this frame
             current_pos: Current cell being processed
         """
+        # STEP 1: Read current grid state (copy wall data)
         grid_state = [[cell.walls for cell in row] for row in generator.grid]
+        
+        # STEP 2: Collect visited cells
         visited = {(cell.x, cell.y) for row in generator.grid 
                   for cell in row if cell.visited}
         
+        # STEP 3: Create frame snapshot
         frame = AnimationFrame(
             grid_state=grid_state,
             visited_cells=visited,
@@ -98,6 +107,8 @@ class MazeGeneratorWithAnimation:
             current_cell=current_pos,
             description=description
         )
+        
+        # STEP 4: ADD TO BUFFER - this fills the animation buffer!
         self.frames.append(frame)
     
     def generate(self, algorithm: str = "prim") -> List[List[Any]]:
@@ -245,14 +256,22 @@ class MazeGeneratorWithAnimation:
         """
         Play the captured animation frames.
         
+        This is HOW WE PRINT THE BUFFER AGAIN:
+        1. Loop through all frames in self.frames (the buffer)
+        2. Render each frame to a string
+        3. Print to screen
+        4. Wait (delay) to create animation effect
+        
         Args:
             fps: Frames per second
         """
         delay = 1.0 / fps
+        
+        # Loop through animation buffer
         for i in range(len(self.frames)):
             print("\033[2J\033[H", end="")  # Clear screen and move to top
-            print(self.render_frame_simple(i))
-            time.sleep(delay)
+            print(self.render_frame_simple(i))  # Render frame from buffer
+            time.sleep(delay)  # Animation delay
         time.sleep(1)
     
     def write_to_hex_file(self, filename: str, entry: Tuple[int, int], exit_coords: Tuple[int, int]) -> None:

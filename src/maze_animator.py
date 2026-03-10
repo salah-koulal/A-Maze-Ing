@@ -22,6 +22,12 @@ class MazeAnimator:
         """
         Animate the maze generation process.
         
+        This shows the REAL-TIME ANIMATION LOOP:
+        1. Render initial state to buffer
+        2. Display buffer to screen
+        3. Loop: generate one step, render to buffer, display
+        4. Buffer is reused (cleared and refilled) each iteration
+        
         Args:
             start_x: Starting cell X
             start_y: Starting cell Y
@@ -39,9 +45,9 @@ class MazeAnimator:
         clear_screen()
         hide_cursor()
 
-        # Initial render - everything solid
-        self.renderer.render_full(show_visited=False)
-        self.renderer.display()
+        # STEP 1: Initial render - everything solid
+        self.renderer.render_full(show_visited=False)  # Fill buffer
+        self.renderer.display()  # Display buffer
         time.sleep(0.5)
         
         # Start generation
@@ -49,7 +55,7 @@ class MazeAnimator:
         stack = [start_cell]
         start_cell.visited = True
 
-        # Main loop
+        # ANIMATION LOOP: Generate and render each step
         while len(stack) > 0:
             current = stack[-1]
             neighbors = self.generator._get_unvisited_neighbors(current)
@@ -62,10 +68,13 @@ class MazeAnimator:
                 neighbor.visited = True
                 stack.append(neighbor)
             
-            # Render current state
+            # STEP 2: Render current state (fills buffer with new content)
             self.renderer.render_full(current_cell=current, show_visited=True)
+            
+            # STEP 3: Display buffer to screen
             self.renderer.display()
             
+            # STEP 4: Wait (creates animation effect)
             time.sleep(delay)
         
         # Final render
