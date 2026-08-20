@@ -125,7 +125,7 @@ generator.run()
 
 ### Roles
 - **[skoulal] (Salah eddine Koulal)**: Core algorithm implementation, Prim's logic, and hex output formatting, BFS path finding algorithm.
-- **[wabbad] (walid)**: Visualization system, animation playback, and Maze generation using DFS.
+- **[wabbad] (Walid Abbad)**: Visualization system, animation playback, and Maze generation using DFS.
 
 ### Project Evolution
 - **Initial Plan**: Focus on basic Recusrive Backtracker.
